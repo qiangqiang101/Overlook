@@ -30,6 +30,7 @@ Partial Class frmMain
         tpUpdates = New TabPage()
         imgForTcTab = New ImageList(components)
         txtSearch = New TextBox()
+        tmLHM = New Timer(components)
         tcMainTab.SuspendLayout()
         SuspendLayout()
         ' 
@@ -100,6 +101,11 @@ Partial Class frmMain
         txtSearch.Size = New Size(295, 27)
         txtSearch.TabIndex = 1001
         ' 
+        ' tmLHM
+        ' 
+        tmLHM.Enabled = True
+        tmLHM.Interval = 10000
+        ' 
         ' frmMain
         ' 
         AutoScaleDimensions = New SizeF(8F, 20F)
@@ -122,5 +128,6 @@ Partial Class frmMain
     Friend WithEvents tpUpdates As TabPage
     Friend WithEvents imgForTcTab As ImageList
     Friend WithEvents txtSearch As TextBox
+    Friend WithEvents tmLHM As Timer
 
 End Class

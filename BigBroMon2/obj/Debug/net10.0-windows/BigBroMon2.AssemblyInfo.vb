@@ -16,7 +16,7 @@ Imports System.Reflection
 <Assembly: System.Reflection.AssemblyCompanyAttribute("BigBroMon2"),  _
  Assembly: System.Reflection.AssemblyConfigurationAttribute("Debug"),  _
  Assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0"),  _
- Assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+41bb016f1847d26e8123eac84d00bcba4e54ac09"),  _
+ Assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3ff79a79003361ed832eaa97d3bba7a6a07ad8dd"),  _
  Assembly: System.Reflection.AssemblyProductAttribute("BigBroMon2"),  _
  Assembly: System.Reflection.AssemblyTitleAttribute("BigBroMon2"),  _
  Assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0"),  _

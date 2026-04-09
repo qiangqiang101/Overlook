@@ -3,16 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\ADMIN\\Documents\\GitHub\\BigBroMonitor2\\BigBroMon2\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{BEAEFF7E-D3A3-478E-8932-D916AB0B13F7}|BigBroMon2.vbproj|c:\\users\\admin\\documents\\github\\bigbromonitor2\\bigbromon2\\frmmain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
-      "RelativeMoniker": "D:0:0:{BEAEFF7E-D3A3-478E-8932-D916AB0B13F7}|BigBroMon2.vbproj|solutionrelative:frmmain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+      "AbsoluteMoniker": "D:0:0:{F5754C45-2303-D67D-0F39-FD11E1639A81}|BigBroMon2.vbproj|c:\\users\\admin\\documents\\github\\bigbromonitor2\\bigbromon2\\frmmain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F5754C45-2303-D67D-0F39-FD11E1639A81}|BigBroMon2.vbproj|solutionrelative:frmmain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BEAEFF7E-D3A3-478E-8932-D916AB0B13F7}|BigBroMon2.vbproj|c:\\users\\admin\\documents\\github\\bigbromonitor2\\bigbromon2\\classes\\uihelper.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
-      "RelativeMoniker": "D:0:0:{BEAEFF7E-D3A3-478E-8932-D916AB0B13F7}|BigBroMon2.vbproj|solutionrelative:classes\\uihelper.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+      "AbsoluteMoniker": "D:0:0:{F5754C45-2303-D67D-0F39-FD11E1639A81}|BigBroMon2.vbproj|c:\\users\\admin\\documents\\github\\bigbromonitor2\\bigbromon2\\classes\\helper.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F5754C45-2303-D67D-0F39-FD11E1639A81}|BigBroMon2.vbproj|solutionrelative:classes\\helper.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BEAEFF7E-D3A3-478E-8932-D916AB0B13F7}|BigBroMon2.vbproj|c:\\users\\admin\\documents\\github\\bigbromonitor2\\bigbromon2\\frmmain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
-      "RelativeMoniker": "D:0:0:{BEAEFF7E-D3A3-478E-8932-D916AB0B13F7}|BigBroMon2.vbproj|solutionrelative:frmmain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form"
+      "AbsoluteMoniker": "D:0:0:{F5754C45-2303-D67D-0F39-FD11E1639A81}|BigBroMon2.vbproj|c:\\users\\admin\\documents\\github\\bigbromonitor2\\bigbromon2\\classes\\uihelper.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F5754C45-2303-D67D-0F39-FD11E1639A81}|BigBroMon2.vbproj|solutionrelative:classes\\uihelper.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5754C45-2303-D67D-0F39-FD11E1639A81}|BigBroMon2.vbproj|c:\\users\\admin\\documents\\github\\bigbromonitor2\\bigbromon2\\classes\\lhm.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F5754C45-2303-D67D-0F39-FD11E1639A81}|BigBroMon2.vbproj|solutionrelative:classes\\lhm.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5754C45-2303-D67D-0F39-FD11E1639A81}|BigBroMon2.vbproj|c:\\users\\admin\\documents\\github\\bigbromonitor2\\bigbromon2\\frmmain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form",
+      "RelativeMoniker": "D:0:0:{F5754C45-2303-D67D-0F39-FD11E1639A81}|BigBroMon2.vbproj|solutionrelative:frmmain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}|Form"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,11 +30,37 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "Helper.vb",
+              "DocumentMoniker": "C:\\Users\\ADMIN\\Documents\\GitHub\\BigBroMonitor2\\BigBroMon2\\Classes\\Helper.vb",
+              "RelativeDocumentMoniker": "Classes\\Helper.vb",
+              "ToolTip": "C:\\Users\\ADMIN\\Documents\\GitHub\\BigBroMonitor2\\BigBroMon2\\Classes\\Helper.vb",
+              "RelativeToolTip": "Classes\\Helper.vb",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-04-09T18:36:03.971Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "LHM.vb",
+              "DocumentMoniker": "C:\\Users\\ADMIN\\Documents\\GitHub\\BigBroMonitor2\\BigBroMon2\\Classes\\LHM.vb",
+              "RelativeDocumentMoniker": "Classes\\LHM.vb",
+              "ToolTip": "C:\\Users\\ADMIN\\Documents\\GitHub\\BigBroMonitor2\\BigBroMon2\\Classes\\LHM.vb",
+              "RelativeToolTip": "Classes\\LHM.vb",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-04-09T17:49:28.305Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "UIHelper.vb",
               "DocumentMoniker": "C:\\Users\\ADMIN\\Documents\\GitHub\\BigBroMonitor2\\BigBroMon2\\Classes\\UIHelper.vb",
               "RelativeDocumentMoniker": "Classes\\UIHelper.vb",
@@ -45,14 +79,14 @@
               "RelativeDocumentMoniker": "frmMain.vb",
               "ToolTip": "C:\\Users\\ADMIN\\Documents\\GitHub\\BigBroMonitor2\\BigBroMon2\\frmMain.vb",
               "RelativeToolTip": "frmMain.vb",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAALAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAALAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
               "WhenOpened": "2026-04-07T16:20:32.644Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "frmMain.vb [Design]",
               "DocumentMoniker": "C:\\Users\\ADMIN\\Documents\\GitHub\\BigBroMonitor2\\BigBroMon2\\frmMain.vb",
               "RelativeDocumentMoniker": "frmMain.vb",

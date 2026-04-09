@@ -17,4 +17,8 @@ Public Class frmMain
     Private Sub OnSearchButtonClick(sender As Object, e As EventArgs)
         MessageBox.Show($"Search for: {txtSearch.Text}", "Search", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
+
+    Private Sub tmLHM_Tick(sender As Object, e As EventArgs) Handles tmLHM.Tick
+        lhm_Service.Refresh()
+    End Sub
 End Class
