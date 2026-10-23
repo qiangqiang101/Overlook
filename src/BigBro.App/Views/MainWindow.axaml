@@ -1,0 +1,81 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:BigBro.App.Views"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+        x:Class="BigBro.App.Views.MainWindow"
+        Title="Overlook"
+        Width="1000" Height="720" MinWidth="820" MinHeight="540"
+        WindowStartupLocation="CenterScreen">
+
+
+    <Grid RowDefinitions="*,Auto">
+        <Grid Grid.Row="0" ColumnDefinitions="310,*">
+
+            <!-- Theme list -->
+            <Border Grid.Column="0" Classes="sidebar">
+            <DockPanel Margin="16,16,12,10" LastChildFill="True">
+                <TextBlock x:Name="ThemesHeading" DockPanel.Dock="Top" Classes="heading" Text="Themes" Margin="0,0,0,8" />
+                <TextBox DockPanel.Dock="Top" x:Name="SearchBox" PlaceholderText="Search name, size or tag" Margin="0,0,0,8" />
+                <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,8,0,0">
+                    <Button x:Name="EditorButton" HorizontalAlignment="Stretch" Content="Theme editor..." />
+                    <Button x:Name="OpenFolderButton" HorizontalAlignment="Stretch" Content="Open themes folder" />
+                </StackPanel>
+                <ListBox x:Name="ThemeList">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="views:ThemeItem">
+                            <Grid ColumnDefinitions="96,*" Margin="0,4">
+                                <Border Grid.Column="0" Width="88" Height="54" CornerRadius="4" ClipToBounds="True"
+                                        Background="{DynamicResource ControlFillColorSecondaryBrush}">
+                                    <Image Source="{Binding Preview}" Stretch="UniformToFill" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Details}" Classes="hint" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+            </Border>
+
+            <!-- Selected theme -->
+            <DockPanel Grid.Column="1" Margin="8,16,16,8">
+                <Button DockPanel.Dock="Top" x:Name="SettingsButton" Content="Settings..." HorizontalAlignment="Right" Margin="0,0,0,10" />
+                <ScrollViewer>
+                    <Border Classes="card">
+                        <StackPanel Spacing="10">
+                            <TextBlock x:Name="NoThemeText" Classes="hint"
+                                       Text="Pick a theme on the left. To bring your 1.x themes over, open the theme editor and use Import." />
+                            <StackPanel x:Name="ThemeDetails" Spacing="10" IsVisible="False">
+                                <Border CornerRadius="6" ClipToBounds="True" HorizontalAlignment="Left"
+                                        Background="{DynamicResource ControlFillColorSecondaryBrush}">
+                                    <Image x:Name="PreviewImage" MaxHeight="220" MaxWidth="640" Stretch="Uniform" />
+                                </Border>
+                                <TextBlock x:Name="ThemeTitle" FontSize="18" FontWeight="SemiBold" />
+                                <TextBlock x:Name="ThemeInfo" Classes="hint" />
+                                <Expander x:Name="CustomizeExpander" Header="Customize this theme" IsVisible="False" HorizontalAlignment="Stretch">
+                                    <StackPanel x:Name="CustomizePanel" Spacing="8" Margin="0,8,0,0" />
+                                </Expander>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button x:Name="ShowButton" Classes="accent" Content="Show panel" />
+                                    <Button x:Name="HideButton" Content="Hide panel" IsEnabled="False" />
+                                </StackPanel>
+                                <TextBlock x:Name="TestResult" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </ScrollViewer>
+            </DockPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Classes="statusbar" Padding="16,7">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" x:Name="UpdateButton" Classes="accent" Padding="10,2" FontSize="12" IsVisible="False" />
+                <TextBlock x:Name="StatusText" Text="Not connected" VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

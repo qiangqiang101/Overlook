@@ -1,0 +1,123 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="BigBro.App.Views.SettingsWindow"
+        Title="Settings"
+        Width="620" Height="860" MinHeight="420" CanResize="True"
+        WindowStartupLocation="CenterOwner">
+
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="20,10,20,16">
+            <Button x:Name="OkButton" Content="OK" Classes="accent" MinWidth="90" IsDefault="True" />
+            <Button x:Name="CancelButton" Content="Cancel" MinWidth="90" IsCancel="True" />
+        </StackPanel>
+    <ScrollViewer>
+        <StackPanel Margin="20,20,20,6" Spacing="14">
+
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock x:Name="SourceHeading" Classes="heading" Text="Sensor source" />
+                    <TextBlock x:Name="SourceHint" Classes="hint"
+                               Text="Overlook reads sensors from LibreHardwareMonitor over the network. On the PC you want to monitor, open LibreHardwareMonitor, turn on Options > Remote Web Server, then enter that PC's address here." />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <TextBox Grid.Column="0" x:Name="UrlBox" PlaceholderText="http://192.168.0.8:8085/data.json" />
+                        <Button Grid.Column="1" x:Name="TestButton" Content="Test connection" />
+                    </Grid>
+                    <TextBlock x:Name="TestResult" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock x:Name="WeatherHeading" Classes="heading" Text="Weather" />
+                    <Grid ColumnDefinitions="170,*" RowDefinitions="Auto,Auto" RowSpacing="8" ColumnSpacing="8">
+                        <TextBlock Grid.Row="0" Grid.Column="0" x:Name="LatLabel" VerticalAlignment="Center" Text="Latitude" />
+                        <NumericUpDown Grid.Row="0" Grid.Column="1" x:Name="LatBox" Minimum="-90" Maximum="90" Increment="0.01" FormatString="0.######" PlaceholderText="e.g. 3.139" HorizontalAlignment="Stretch" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" x:Name="LonLabel" VerticalAlignment="Center" Text="Longitude" />
+                        <NumericUpDown Grid.Row="1" Grid.Column="1" x:Name="LonBox" Minimum="-180" Maximum="180" Increment="0.01" FormatString="0.######" PlaceholderText="e.g. 101.687" HorizontalAlignment="Stretch" />
+                    </Grid>
+                    <Button x:Name="LatLongButton" Content="Find my latitude and longitude" HorizontalAlignment="Left" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock x:Name="RgbHeading" Classes="heading" Text="RGB background" />
+                    <TextBlock x:Name="RgbHint" Classes="hint"
+                               Text="Themes with an RGB background show your lighting behind them, using the same UDP stream as RGB Wallpaper (the SignalRGB / OpenRGB / RGBJunkie plugin broadcasts it). Both apps can listen at once, so the panel and your wallpaper stay in sync. The plugin also sends these appearance settings and overwrites what you set here." />
+                    <CheckBox x:Name="RgbListenBox" Content="Receive lighting data" />
+                    <Grid ColumnDefinitions="170,*" RowDefinitions="Auto,Auto" RowSpacing="8" ColumnSpacing="8">
+                        <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="UDP port" />
+                        <NumericUpDown Grid.Row="0" Grid.Column="1" x:Name="RgbPortBox" Minimum="1024" Maximum="65535" Increment="1" FormatString="0" HorizontalAlignment="Stretch" />
+                        <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="When nothing is sending" />
+                        <ComboBox Grid.Row="1" Grid.Column="1" x:Name="RgbEffectBox" HorizontalAlignment="Stretch" />
+                    </Grid>
+                    <TextBlock x:Name="RgbStatus" Classes="hint" />
+                    <Expander x:Name="RgbAppearance" Header="Appearance" HorizontalAlignment="Stretch">
+                        <Grid ColumnDefinitions="170,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="8" Margin="0,8,0,0">
+                            <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="Offline colour" />
+                            <ColorPicker Grid.Row="0" Grid.Column="1" x:Name="RgbShutdownColor" HorizontalAlignment="Left" />
+                            <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="Matrix shape" />
+                            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="RgbMatrixTypeBox" HorizontalAlignment="Stretch" />
+                            <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="Matrix size" />
+                            <ComboBox Grid.Row="2" Grid.Column="1" x:Name="RgbMatrixTierBox" HorizontalAlignment="Stretch" />
+                            <TextBlock Grid.Row="3" VerticalAlignment="Center" Text="LED shape" />
+                            <ComboBox Grid.Row="3" Grid.Column="1" x:Name="RgbShapeBox" HorizontalAlignment="Stretch" />
+                            <TextBlock Grid.Row="4" VerticalAlignment="Center" Text="Corner radius" />
+                            <NumericUpDown Grid.Row="4" Grid.Column="1" x:Name="RgbRadiusBox" Minimum="0" Maximum="100" Increment="1" FormatString="0" HorizontalAlignment="Stretch" />
+                            <TextBlock Grid.Row="5" VerticalAlignment="Center" Text="LED padding" />
+                            <NumericUpDown Grid.Row="5" Grid.Column="1" x:Name="RgbPaddingBox" Minimum="0" Maximum="50" Increment="0.5" FormatString="0.#" HorizontalAlignment="Stretch" />
+                            <TextBlock Grid.Row="6" VerticalAlignment="Center" Text="Blur" />
+                            <NumericUpDown Grid.Row="6" Grid.Column="1" x:Name="RgbBlurBox" Minimum="0" Maximum="100" Increment="1" FormatString="0" HorizontalAlignment="Stretch" />
+                            <TextBlock Grid.Row="7" VerticalAlignment="Center" Text="Frames per second" />
+                            <NumericUpDown Grid.Row="7" Grid.Column="1" x:Name="RgbFpsBox" Minimum="5" Maximum="120" Increment="5" FormatString="0" HorizontalAlignment="Stretch" />
+                            <TextBlock Grid.Row="8" VerticalAlignment="Center" Text="Background colour" />
+                            <ColorPicker Grid.Row="8" Grid.Column="1" x:Name="RgbBackgroundColor" HorizontalAlignment="Left" />
+                            <TextBlock Grid.Row="9" VerticalAlignment="Center" Text="Cover image" />
+                            <Grid Grid.Row="9" Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                <TextBox x:Name="RgbCoverBox" PlaceholderText="path or http link (optional)" />
+                                <Button Grid.Column="1" x:Name="RgbCoverButton" Content="Choose..." />
+                            </Grid>
+                            <TextBlock Grid.Row="10" VerticalAlignment="Center" Text="Cover image fit" />
+                            <ComboBox Grid.Row="10" Grid.Column="1" x:Name="RgbStretchBox" HorizontalAlignment="Stretch" />
+                        </Grid>
+                    </Expander>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock x:Name="GeneralHeading" Classes="heading" Text="General" />
+                    <Grid ColumnDefinitions="170,*" ColumnSpacing="8">
+                        <TextBlock x:Name="LanguageLabel" VerticalAlignment="Center" Text="Language" />
+                        <ComboBox Grid.Column="1" x:Name="LanguageBox" HorizontalAlignment="Stretch" />
+                    </Grid>
+                    <CheckBox x:Name="StartWithSystemBox" Content="Start Overlook when I sign in" />
+                    <CheckBox x:Name="MinimizeToTrayBox" Content="Minimizing the main window hides it to the tray" />
+                    <CheckBox x:Name="UpdatesBox" Content="Check for updates when Overlook starts" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button x:Name="UpdateCheckButton" Content="Check for updates now" />
+                        <Button x:Name="UpdateDownloadButton" Content="Open the release page" Classes="accent" IsVisible="False" />
+                    </StackPanel>
+                    <TextBlock x:Name="UpdateResult" TextWrapping="Wrap" />
+                    <CheckBox x:Name="PrimaryWindowsBox" Content="Open windows on the primary display when the panel is on another display" />
+                    <CheckBox x:Name="TopMostBox" Content="Keep the panel on top of other windows" />
+                    <CheckBox x:Name="AutoShowBox" Content="Show the panel automatically when Overlook starts" />
+                    <CheckBox x:Name="HqAudioBox" Content="High quality audio visualizer (smoother, uses more CPU)" />
+                    <Button x:Name="ResetPositionButton" Content="Reset the panel position" HorizontalAlignment="Left" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock x:Name="LocalHeading" Classes="heading" Text="This computer" />
+                    <TextBlock x:Name="LocalInfoText" Classes="hint" />
+                    <TextBlock x:Name="LocalHint" Classes="hint"
+                               Text="Date and time, ping, uptime, drive sizes, screen resolution, refresh rate and FPS describe the computer Overlook runs on, not the monitored PC. FPS and frametime need MSI Afterburner (with RivaTuner) running on this same computer. Everything else comes from LibreHardwareMonitor." />
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+    </DockPanel>
+</Window>

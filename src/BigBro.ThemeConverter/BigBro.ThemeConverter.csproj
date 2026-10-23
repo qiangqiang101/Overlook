@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>bigbro-convert</AssemblyName>
+    <RootNamespace>BigBro.ThemeConverter</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BigBro.Core\BigBro.Core.csproj" />
+  </ItemGroup>
+</Project>

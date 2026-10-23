@@ -1,0 +1,117 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:editor="using:BigBro.App.Editor"
+        x:Class="BigBro.App.Editor.ThemeEditorWindow"
+        Title="Theme editor"
+        Width="1480" Height="900" MinWidth="1000" MinHeight="600"
+        WindowStartupLocation="CenterScreen">
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top" x:Name="MainMenu">
+            <MenuItem x:Name="FileMenu" Header="_File">
+                <MenuItem x:Name="NewItem" Header="_New theme" InputGesture="Ctrl+N" />
+                <MenuItem x:Name="OpenMenu" Header="_Open theme" />
+                <Separator />
+                <MenuItem x:Name="SaveItem" Header="_Save" InputGesture="Ctrl+S" />
+                <MenuItem x:Name="SaveAsItem" Header="Save _as..." />
+                <Separator />
+                <MenuItem x:Name="ImportItem" Header="_Import 1.x themes (.xml)..." />
+                <MenuItem x:Name="ImportFolderItem" Header="Import a 1.x _Themes folder..." />
+                <Separator />
+                <MenuItem x:Name="CloseItem" Header="_Close editor" />
+            </MenuItem>
+            <MenuItem x:Name="EditMenu" Header="_Edit">
+                <MenuItem x:Name="UndoItem" Header="_Undo" InputGesture="Ctrl+Z" />
+                <MenuItem x:Name="RedoItem" Header="_Redo" InputGesture="Ctrl+Y" />
+                <Separator />
+                <MenuItem x:Name="DuplicateItem" Header="_Duplicate" InputGesture="Ctrl+D" />
+                <MenuItem x:Name="DeleteItem" Header="De_lete" InputGesture="Delete" />
+                <Separator />
+                <MenuItem x:Name="ForwardItem" Header="Bring _forward" />
+                <MenuItem x:Name="BackwardItem" Header="Send _back" />
+            </MenuItem>
+            <MenuItem x:Name="AddMenu" Header="_Add" />
+            <MenuItem x:Name="ViewMenu" Header="_View">
+                <MenuItem x:Name="SnapItem" Header="_Snap to grid" ToggleType="CheckBox" />
+                <MenuItem x:Name="ShowGridItem" Header="Show _grid" ToggleType="CheckBox" />
+                <MenuItem x:Name="GridSizeMenu" Header="Grid _size" />
+                <Separator />
+                <MenuItem x:Name="ZoomInItem" Header="Zoom _in" />
+                <MenuItem x:Name="ZoomOutItem" Header="Zoom _out" />
+                <MenuItem x:Name="Zoom100Item" Header="_Actual size (100%)" />
+                <MenuItem x:Name="FitItem" Header="_Fit to window" />
+            </MenuItem>
+            <MenuItem x:Name="ToolsMenu" Header="_Tools">
+                <MenuItem x:Name="PreviewItem" Header="Update _preview image" />
+            </MenuItem>
+        </Menu>
+
+        <Border DockPanel.Dock="Bottom" Classes="statusbar" Padding="12,4">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+                    <TextBlock x:Name="ZoomLabel" Text="Zoom 100%" VerticalAlignment="Center" />
+                    <Slider x:Name="ZoomSlider" Minimum="0.25" Maximum="3" Value="1" Width="160" VerticalAlignment="Center" />
+                </StackPanel>
+                <TextBlock x:Name="StatusText" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            </DockPanel>
+        </Border>
+
+        <Grid x:Name="BodyGrid" ColumnDefinitions="270,Auto,*,Auto,380">
+            <Border Grid.Column="0" x:Name="LeftHost">
+            <DockPanel x:Name="LeftPanel" Margin="8">
+                <DockPanel DockPanel.Dock="Top" Margin="0,2,0,8">
+                    <Button DockPanel.Dock="Right" x:Name="LeftDockButton" Content="Undock" Padding="8,2" FontSize="12" />
+                    <TextBlock x:Name="ElementsHeading" Classes="heading" Text="Elements" VerticalAlignment="Center" />
+                </DockPanel>
+                <TreeView x:Name="Tree">
+                    <TreeView.Styles>
+                        <Style Selector="TreeViewItem" x:DataType="editor:ElementNode">
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                        </Style>
+                    </TreeView.Styles>
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate x:DataType="editor:ElementNode" ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Header}" TextTrimming="CharacterEllipsis" />
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </DockPanel>
+            </Border>
+
+            <GridSplitter Grid.Column="1" x:Name="LeftSplitter" Width="5" ResizeDirection="Columns" Background="#26262B" />
+
+            <ScrollViewer Grid.Column="2" x:Name="CanvasScroll"
+                          HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                          Background="#0E0E10">
+                <LayoutTransformControl x:Name="ZoomHost" Margin="24" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Border x:Name="CanvasBorder" BorderThickness="1" BorderBrush="#555555">
+                        <Grid x:Name="CanvasHost" />
+                    </Border>
+                </LayoutTransformControl>
+            </ScrollViewer>
+
+            <GridSplitter Grid.Column="3" x:Name="RightSplitter" Width="5" ResizeDirection="Columns" Background="#26262B" />
+
+            <Border Grid.Column="4" x:Name="RightHost">
+            <DockPanel x:Name="RightPanel" Margin="0,4,8,8">
+            <DockPanel DockPanel.Dock="Top" Margin="8,0,0,4">
+                <Button DockPanel.Dock="Right" x:Name="RightDockButton" Content="Undock" Padding="8,2" FontSize="12" />
+                <TextBlock x:Name="PropertiesHeading" Classes="heading" Text="Properties" VerticalAlignment="Center" />
+            </DockPanel>
+            <TabControl x:Name="SideTabs">
+                <TabItem Header="Element">
+                    <ScrollViewer>
+                        <StackPanel x:Name="ElementPanel" Margin="8" Spacing="8" />
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Theme">
+                    <ScrollViewer>
+                        <StackPanel x:Name="ThemePanel" Margin="8" Spacing="8" />
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+            </DockPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

@@ -1,0 +1,22 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="BigBro.App.App"
+             RequestedThemeVariant="Dark">
+    <Application.Styles>
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <!-- ROG red on near-black; the Fluent controls derive their greys from this -->
+                <ColorPaletteResources x:Key="Dark"
+                    Accent="#E4002B" RegionColor="#0A0A0B"
+                    AltHigh="#0A0A0B" AltLow="#0A0A0B" AltMedium="#0A0A0B" AltMediumHigh="#0A0A0B" AltMediumLow="#0A0A0B"
+                    BaseHigh="#FFFFFF" BaseLow="#2B2B2F" BaseMedium="#8E8E96" BaseMediumHigh="#B8B8BE" BaseMediumLow="#5A5A60"
+                    ChromeAltLow="#B8B8BE" ChromeBlackHigh="#000000" ChromeBlackLow="#B8B8BE" ChromeBlackMedium="#000000" ChromeBlackMediumLow="#000000"
+                    ChromeDisabledHigh="#2B2B2F" ChromeDisabledLow="#8E8E96" ChromeGray="#6E6E74" ChromeHigh="#6E6E74"
+                    ChromeLow="#101012" ChromeMedium="#17171A" ChromeMediumLow="#1E1E22" ChromeWhite="#FFFFFF"
+                    ListLow="#1A1A1D" ListMedium="#2B2B2F" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+        <StyleInclude Source="avares://Overlook/Styles/Rog.axaml" />
+    </Application.Styles>
+</Application>

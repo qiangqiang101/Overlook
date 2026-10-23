@@ -1,0 +1,23 @@
+{
+  "main.resetFilter": "Tetapkan semula",
+  "main.userSettings": "Ketetapan pengguna",
+  "main.themeEditor": "Penyunting Tema",
+  "main.settings": "Tetapan",
+  "tray.message": "Overlook akan terus berjalan di latar belakang. Klik ikon dulang untuk kembalikan suntingan asal.",
+  "settings.title": "Tetapan",
+  "settings.weather": "Tetapan ramalan cuaca",
+  "settings.latLong": "Lat & Long",
+  "settings.getLatLong": "Dapatkan Latitud & Longitud",
+  "settings.startWithSystem": "Bermula dengan Windows",
+  "settings.topMost": "Monitor sentiasa berada di atas",
+  "settings.language": "Bahasa",
+  "settings.resetPosition": "Tetapkan Semula Kedudukan Sensor Panel",
+  "settings.hqAudio": "Kesan Audio HQ",
+  "common.search": "Carian",
+  "common.close": "Tutup",
+  "common.ok": "OK",
+  "common.cancel": "Batal",
+  "common.apply": "Tetapkan",
+  "common.delete": "Dibuang",
+  "common.save": "Simpan"
+}

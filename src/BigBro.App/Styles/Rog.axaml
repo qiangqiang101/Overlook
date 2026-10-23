@@ -1,0 +1,185 @@
+<!-- ROG Armoury Crate look: near-black surfaces with a dark red glow, square outlined controls, red accent. -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Dark">
+                    <Color x:Key="RogRedColor">#E4002B</Color>
+                    <SolidColorBrush x:Key="RogRed" Color="#E4002B" />
+                    <SolidColorBrush x:Key="RogRedBright" Color="#FF1F4D" />
+                    <SolidColorBrush x:Key="RogRedDeep" Color="#A8001F" />
+                    <SolidColorBrush x:Key="RogLine" Color="#2C2C30" />
+                    <SolidColorBrush x:Key="RogOutline" Color="#C9C9CE" />
+                    <SolidColorBrush x:Key="RogMuted" Color="#9A9AA2" />
+                    <SolidColorBrush x:Key="RogPanel" Color="#E60D0D0F" />
+                    <SolidColorBrush x:Key="RogSidebar" Color="#F2080809" />
+
+                    <!-- the dark window with a red glow in the lower right corner -->
+                    <RadialGradientBrush x:Key="RogWindowBackground" Center="100%,100%" GradientOrigin="100%,100%" RadiusX="95%" RadiusY="110%">
+                        <GradientStop Offset="0" Color="#4A0816" />
+                        <GradientStop Offset="0.35" Color="#1C080D" />
+                        <GradientStop Offset="0.8" Color="#0B0B0C" />
+                        <GradientStop Offset="1" Color="#09090A" />
+                    </RadialGradientBrush>
+
+                    <!-- selected row: red wash fading to the right -->
+                    <LinearGradientBrush x:Key="RogSelected" StartPoint="0%,50%" EndPoint="100%,50%">
+                        <GradientStop Offset="0" Color="#B0E4002B" />
+                        <GradientStop Offset="1" Color="#10E4002B" />
+                    </LinearGradientBrush>
+                    <LinearGradientBrush x:Key="RogSelectedHover" StartPoint="0%,50%" EndPoint="100%,50%">
+                        <GradientStop Offset="0" Color="#C8E4002B" />
+                        <GradientStop Offset="1" Color="#20E4002B" />
+                    </LinearGradientBrush>
+                    <LinearGradientBrush x:Key="RogHover" StartPoint="0%,50%" EndPoint="100%,50%">
+                        <GradientStop Offset="0" Color="#40E4002B" />
+                        <GradientStop Offset="1" Color="#00E4002B" />
+                    </LinearGradientBrush>
+                    <LinearGradientBrush x:Key="RogTabSelected" StartPoint="50%,0%" EndPoint="50%,100%">
+                        <GradientStop Offset="0" Color="#00E4002B" />
+                        <GradientStop Offset="1" Color="#70E4002B" />
+                    </LinearGradientBrush>
+
+                    <!-- three red chevrons, the ROG section marker -->
+                    <DrawingGroup x:Key="RogMarkDrawing" ClipGeometry="M0,0 L26,0 L26,14 L0,14 Z">
+                            <GeometryDrawing Brush="#E4002B" Geometry="M0,0 L4,0 L10,7 L4,14 L0,14 L6,7 Z" />
+                            <GeometryDrawing Brush="#E4002B" Geometry="M8,0 L12,0 L18,7 L12,14 L8,14 L14,7 Z" />
+                            <GeometryDrawing Brush="#E4002B" Geometry="M16,0 L20,0 L26,7 L20,14 L16,14 L22,7 Z" />
+                    </DrawingGroup>
+                    <DrawingBrush x:Key="RogMarkBrush" Drawing="{StaticResource RogMarkDrawing}" Stretch="None" AlignmentX="Left" AlignmentY="Center" />
+
+                    <!-- Fluent resources, re-pointed at the ROG palette -->
+                    <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+                    <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
+                    <CornerRadius x:Key="TabItemHeaderCornerRadius">0</CornerRadius>
+                    <CornerRadius x:Key="SliderThumbCornerRadius">0</CornerRadius>
+
+                    <SolidColorBrush x:Key="ButtonBackground" Color="#12FFFFFF" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#38E4002B" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#70E4002B" />
+                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#08FFFFFF" />
+                    <SolidColorBrush x:Key="ButtonBorderBrush" Color="#C9C9CE" />
+                    <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#E4002B" />
+                    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#3A3A3E" />
+                    <SolidColorBrush x:Key="ButtonForeground" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#6A6A70" />
+
+                    <SolidColorBrush x:Key="AccentButtonBackground" Color="#E4002B" />
+                    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#FF1F4D" />
+                    <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#A8001F" />
+                    <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#3A1018" />
+                    <SolidColorBrush x:Key="AccentButtonBorderBrush" Color="#FF5A78" />
+                    <SolidColorBrush x:Key="AccentButtonBorderBrushPointerOver" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="AccentButtonBorderBrushPressed" Color="#FF5A78" />
+                    <SolidColorBrush x:Key="AccentButtonForeground" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#FFFFFF" />
+
+                    <SolidColorBrush x:Key="TextControlBackground" Color="#0A0A0C" />
+                    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#111114" />
+                    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#0A0A0C" />
+                    <SolidColorBrush x:Key="TextControlBorderBrush" Color="#8E8E96" />
+                    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="TextControlForeground" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#6E6E76" />
+
+                    <SolidColorBrush x:Key="ComboBoxBackground" Color="#0A0A0C" />
+                    <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#111114" />
+                    <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="#111114" />
+                    <SolidColorBrush x:Key="ComboBoxBackgroundFocused" Color="#0A0A0C" />
+                    <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#8E8E96" />
+                    <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ComboBoxBorderBrushFocused" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="#101013" />
+                    <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush" Color="#8E8E96" />
+
+                    <StaticResource x:Key="ListBoxItemBackgroundSelected" ResourceKey="RogSelected" />
+                    <StaticResource x:Key="ListBoxItemBackgroundSelectedPointerOver" ResourceKey="RogSelectedHover" />
+                    <StaticResource x:Key="ListBoxItemBackgroundSelectedPressed" ResourceKey="RogSelectedHover" />
+                    <StaticResource x:Key="ListBoxItemBackgroundPointerOver" ResourceKey="RogHover" />
+                    <StaticResource x:Key="ListBoxItemBackgroundPressed" ResourceKey="RogHover" />
+                    <StaticResource x:Key="TreeViewItemBackgroundSelected" ResourceKey="RogSelected" />
+                    <StaticResource x:Key="TreeViewItemBackgroundSelectedPointerOver" ResourceKey="RogSelectedHover" />
+                    <StaticResource x:Key="TreeViewItemBackgroundSelectedPressed" ResourceKey="RogSelectedHover" />
+                    <StaticResource x:Key="TreeViewItemBackgroundPointerOver" ResourceKey="RogHover" />
+                    <StaticResource x:Key="TreeViewItemBackgroundPressed" ResourceKey="RogHover" />
+
+                    <StaticResource x:Key="TabItemHeaderBackgroundSelected" ResourceKey="RogTabSelected" />
+                    <StaticResource x:Key="TabItemHeaderBackgroundSelectedPointerOver" ResourceKey="RogTabSelected" />
+                    <StaticResource x:Key="TabItemHeaderBackgroundSelectedPressed" ResourceKey="RogTabSelected" />
+                    <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselected" Color="Transparent" />
+                    <SolidColorBrush x:Key="TabItemHeaderForegroundSelected" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="TabItemHeaderForegroundUnselected" Color="#9A9AA2" />
+
+                    <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="#0AFFFFFF" />
+                    <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="#2C2C30" />
+                    <SolidColorBrush x:Key="ExpanderContentBackground" Color="Transparent" />
+                    <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="#2C2C30" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{DynamicResource RogWindowBackground}" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <!-- panels -->
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{DynamicResource RogPanel}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RogLine}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Padding" Value="18" />
+    </Style>
+    <Style Selector="Border.sidebar">
+        <Setter Property="Background" Value="{DynamicResource RogSidebar}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RogLine}" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+    </Style>
+    <Style Selector="Border.statusbar">
+        <Setter Property="Background" Value="#CC060607" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RogLine}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+    </Style>
+
+    <!-- text -->
+    <Style Selector="TextBlock.heading">
+        <Setter Property="FontSize" Value="17" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="34,2,0,2" />
+        <Setter Property="Background" Value="{DynamicResource RogMarkBrush}" />
+    </Style>
+    <Style Selector="TextBlock.title">
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.hint">
+        <Setter Property="Foreground" Value="{DynamicResource RogMuted}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- controls that Fluent shapes with its own templates -->
+    <Style Selector="Button">
+        <Setter Property="Padding" Value="14,6" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="ListBoxItem">
+        <Setter Property="Padding" Value="10,6" />
+    </Style>
+    <Style Selector="Expander">
+        <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="ScrollViewer">
+        <Setter Property="AllowAutoHide" Value="True" />
+    </Style>
+</Styles>

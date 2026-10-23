@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Overlook
+Comment=Sensor panel for LibreHardwareMonitor
+Exec=overlook
+Icon=overlook
+Categories=Utility;System;Monitor;
+Terminal=false

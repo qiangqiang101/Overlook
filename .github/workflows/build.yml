@@ -1,0 +1,146 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet test tests/BigBro.Core.Tests -c Release
+
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      deb: ${{ steps.v.outputs.deb }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            version="${{ github.event.release.tag_name }}"
+            version="${version#v}"
+          else
+            base=$(grep -oP '(?<=<Version>)[^<]+' Directory.Build.props)
+            version="${base}-dev.${{ github.run_number }}"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "deb=${version//-/~}" >> "$GITHUB_OUTPUT"
+
+  windows:
+    needs: [test, version]
+    runs-on: windows-latest
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish
+        shell: bash
+        run: >
+          dotnet publish src/BigBro.App -c Release -r win-x64 --self-contained
+          -p:Version="$VERSION" -p:DebugType=none -o publish/win-x64
+
+      - name: Portable zip
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          Copy-Item -Recurse publish/win-x64 publish/portable
+          New-Item publish/portable/portable.txt -ItemType File -Value "Delete this file to keep settings in %AppData% instead of the Data folder." | Out-Null
+          Compress-Archive -Path publish/portable/* -DestinationPath "artifacts/Overlook-$env:VERSION-win-x64-portable.zip"
+
+      - name: Installer
+        shell: pwsh
+        run: |
+          $inno = "${env:ProgramFiles(x86)}\Inno Setup 6"
+          if (-not (Test-Path "$inno\ISCC.exe")) { choco install innosetup --no-progress -y }
+          $iscc = "$inno\ISCC.exe"
+          $appVersion = $env:VERSION -replace '-.*$', ''
+          & $iscc "/DAppVersion=$appVersion" "/DSourceDir=$PWD\publish\win-x64" "/DOutputDir=$PWD\artifacts" packaging\Overlook.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
+          # keep the full version (with -dev.N) in the file name
+          $setup = Get-ChildItem artifacts -Filter "Overlook-Setup-*.exe" | Select-Object -First 1
+          $target = "Overlook-Setup-$env:VERSION-win-x64.exe"
+          if ($setup.Name -ne $target) { Rename-Item $setup.FullName $target }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: artifacts/*
+
+  linux:
+    needs: [test, version]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: linux-x64
+            deb: amd64
+          - rid: linux-arm64
+            deb: arm64
+          - rid: linux-arm
+            deb: armhf
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      DEB_VERSION: ${{ needs.version.outputs.deb }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish
+        run: >
+          dotnet publish src/BigBro.App -c Release -r ${{ matrix.rid }} --self-contained
+          -p:Version="$VERSION" -p:DebugType=none -o publish/${{ matrix.rid }}
+
+      - name: tar.gz
+        run: |
+          mkdir -p artifacts
+          chmod +x publish/${{ matrix.rid }}/Overlook
+          tar -C publish/${{ matrix.rid }} -czf "artifacts/overlook-$VERSION-${{ matrix.deb }}.tar.gz" .
+
+      - name: .deb
+        run: bash packaging/build-deb.sh publish/${{ matrix.rid }} ${{ matrix.deb }} "$DEB_VERSION" "artifacts/overlook_${VERSION}_${{ matrix.deb }}.deb"
+
+      - name: AppImage
+        if: matrix.rid == 'linux-x64'
+        run: bash packaging/build-appimage.sh publish/linux-x64 "artifacts/Overlook-$VERSION-x86_64.AppImage"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.deb }}
+          path: artifacts/*
+
+  release:
+    if: github.event_name == 'release'
+    needs: [windows, linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" artifacts/* --repo "${{ github.repository }}" --clobber

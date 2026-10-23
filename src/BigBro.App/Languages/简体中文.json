@@ -1,0 +1,23 @@
+{
+  "main.resetFilter": "重置过滤器",
+  "main.userSettings": "用户定义选项",
+  "main.themeEditor": "主题编辑器",
+  "main.settings": "设置",
+  "tray.message": "Overlook 将在后台继续运行。 单击托盘图标进行恢复。",
+  "settings.title": "设置",
+  "settings.weather": "天气预报设置",
+  "settings.latLong": "经纬度",
+  "settings.getLatLong": "获取经纬度",
+  "settings.startWithSystem": "开机自动启动",
+  "settings.topMost": "保持巅峰状态",
+  "settings.language": "语言",
+  "settings.resetPosition": "重置面板位置",
+  "settings.hqAudio": "提高音效画面效果",
+  "common.search": "搜索",
+  "common.close": "关闭",
+  "common.ok": "OK",
+  "common.cancel": "取消",
+  "common.apply": "应用",
+  "common.delete": "删除",
+  "common.save": "保存"
+}

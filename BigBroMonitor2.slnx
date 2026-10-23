@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BigBro.App/BigBro.App.csproj" />
+    <Project Path="src/BigBro.Core/BigBro.Core.csproj" />
+    <Project Path="src/BigBro.ThemeConverter/BigBro.ThemeConverter.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BigBro.Core.Tests/BigBro.Core.Tests.csproj" />
+  </Folder>
+</Solution>
