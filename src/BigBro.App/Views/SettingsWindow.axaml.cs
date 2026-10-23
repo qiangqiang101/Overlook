@@ -241,20 +241,6 @@ public sealed partial class SettingsWindow : Window
         }
     }
 
-    private string DescribeLocal()
-    {
-        var refresh = _services.Hub.Local.RefreshRate;
-        var afterburner = !AfterburnerReader.IsSupported
-            ? Loc.T("settings.fpsWindowsOnly", "FPS counters: Windows only.")
-            : _services.Hub.Local.FramesPerSecond > 0 || _services.Hub.Local.FrameTimeMs > 0
-                ? Loc.T("settings.afterburnerOk", "MSI Afterburner: connected.")
-                : Loc.T("settings.afterburnerMissing", "MSI Afterburner: not detected (start Afterburner and RivaTuner, and enable the 'Framerate' counter).");
-        var audio = OperatingSystem.IsLinux()
-            ? Loc.T("settings.audioLinux", "Audio visualizer: needs 'parec' (pulseaudio-utils) to capture system audio.")
-            : Loc.T("settings.audioWindows", "Audio visualizer: captures what this computer plays.");
-        var rate = refresh > 0 ? $"{refresh:0} Hz" : Loc.T("settings.unknown", "unknown");
-        return $"{Loc.T("settings.refreshRate", "Display refresh rate: {0}.", rate)}\n{afterburner}\n{audio}";
-    }
 
     private async void OnTestClick(object? sender, RoutedEventArgs e)
     {

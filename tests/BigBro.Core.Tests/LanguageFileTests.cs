@@ -43,7 +43,7 @@ public partial class LanguageFileTests
             }
         }
         // the three long hints get their English text from the XAML
-        foreach (var k in new[] { "settings.sourceHint", "settings.rgbHint", "settings.localHint" }) keys[k] = null;
+        foreach (var k in new[] { "settings.sourceHint", "settings.rgbHint" }) keys[k] = null;
         return keys;
     }
 
