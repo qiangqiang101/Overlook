@@ -18,7 +18,7 @@ public sealed record UpdateCheckResult(UpdateInfo? Update, string? Error)
 /// <summary>Asks GitHub whether a newer release than the running one has been published.</summary>
 public static class UpdateChecker
 {
-    public const string Repository = "qiangqiang101/BigBroMonitor2";
+    public const string Repository = "qiangqiang101/Overlook";
 
     /// <summary>The running version (declared before the client, which reads it while static fields are initialised in order) (without any "-dev.N" or build suffix).</summary>
     public static Version CurrentVersion { get; } =

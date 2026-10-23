@@ -47,5 +47,4 @@ Format details: [docs/theme-format.md](docs/theme-format.md).
 ## Limits
 * Date/time, ping, uptime, drive sizes, screen resolution, refresh rate and FPS describe the machine the app runs on, not the monitored PC.
 * RAM speed is derived from the DIMMs' SPD timings. Display refresh rate on Linux needs `xrandr`.
-* Not ported: the HTTP broadcast server and the second-screen window (dropped on purpose).
 * YouTube players are native web views, so they always sit on top of the drawn elements.

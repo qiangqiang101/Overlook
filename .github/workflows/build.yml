@@ -40,7 +40,8 @@ jobs:
             version="${base}-dev.${{ github.run_number }}"
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "deb=${version//-/~}" >> "$GITHUB_OUTPUT"
+          # deb sorts "~" before the release, so 2.0.0~dev.1 comes before 2.0.0 (sed: a bare ~ in ${var//-/~} expands to $HOME)
+          echo "deb=$(echo "$version" | sed 's/-/~/g')" >> "$GITHUB_OUTPUT"
 
   windows:
     needs: [test, version]
