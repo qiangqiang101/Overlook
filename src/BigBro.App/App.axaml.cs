@@ -22,6 +22,7 @@ public sealed class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        CrashLog.HookUiThread();
         Services = AppServices.Create(DataDirectoryOverride);
         Loc.Load(Services.Settings.Language, SettingsWindow.LanguageFolders(Services));
 

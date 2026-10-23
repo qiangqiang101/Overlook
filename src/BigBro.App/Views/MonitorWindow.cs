@@ -101,6 +101,7 @@ public sealed class MonitorWindow : Window
             foreach (var (_, _, id) in slots)
             {
                 var web = new NativeWebView();
+                WebViewSetup.Configure(web, _services.DataDirectory);
                 if (YoutubeEmbed.ExtractId(id) is { } videoId)
                     web.Source = YoutubeHost.Instance.PageFor(videoId);
                 _overlay.Children.Add(web);

@@ -1,5 +1,6 @@
 using Avalonia;
 using BigBro.App.Cli;
+using BigBro.Core.Settings;
 
 namespace BigBro.App;
 
@@ -13,12 +14,22 @@ internal static class Program
         else if (File.Exists(Path.Combine(AppContext.BaseDirectory, "portable.txt")))
             App.DataDirectoryOverride = Path.Combine(AppContext.BaseDirectory, "Data");     // portable build: keep settings next to the program
 
+        CrashLog.Install(App.DataDirectoryOverride ?? SettingsStore.DefaultDataDirectory);
+
         if (args.Contains("--render"))
             return RenderCommand.Run(args, BuildAvaloniaApp);
         if (args.Contains("--screenshot"))
             return ScreenshotCommand.Run(args, BuildAvaloniaApp);
 
-        return BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        try
+        {
+            return BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
+        catch (Exception ex)
+        {
+            CrashLog.Write("Crash while running", ex);
+            throw;
+        }
     }
 
     // Also used by the previewer.
