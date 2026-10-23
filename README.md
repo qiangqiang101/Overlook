@@ -8,6 +8,8 @@ A sensor-panel app for small displays, rewritten for **.NET 10** and **Avalonia 
 * **Linux** can also read its own sensors, so no Windows PC is needed. Settings > Sensor source > "Use this computer's own sensors" (on by default on Linux) reads `/proc` and `/sys` (CPU load, clocks and temperatures, motherboard fan, voltage and temperature chips, NVMe/SATA drive temperatures, AMD GPUs, memory, network) and `nvidia-smi` for NVIDIA GPUs. Sensors use the same `Computer/Hardware/Group/Name` paths, so the same sensor picker and themes work. Some values need permission: CPU power (RAPL) is usually root-only and is skipped when unreadable. Install `lm-sensors` and run `sensors-detect` if a motherboard chip is missing.
 * Themes are **JSON** (`theme.json` + `assets/`). 1.x XML themes convert with the built-in importer or `bigbro-convert`.
 
+<img width="1280" height="318" alt="QQ20261024-003600" src="https://github.com/user-attachments/assets/dece9774-323f-404e-8a1a-84fa5e9e400b" />
+
 ## Run
     dotnet run --project src/BigBro.App
 Pick a theme, press **Show panel**. Drag the panel to move it: it stays on screen and snaps flush to screen edges; right-click for options.
