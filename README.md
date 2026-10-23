@@ -1,5 +1,7 @@
 # Overlook
 
+**English** | [简体中文](README.ZH.md)
+
 A sensor-panel app for small displays, rewritten for **.NET 10** and **Avalonia UI** supports **Windows and Linux**.
 
 * Sensors are addressed by their LibreHardwareMonitor path, e.g. `ROGPC2/Intel Core i5-14600K/Load/CPU Total`, and come from a remote **LibreHardwareMonitor** (Options > Remote Web Server), default `http://127.0.0.1:8085/data.json`.
