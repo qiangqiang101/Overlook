@@ -38,6 +38,9 @@ public sealed class AppServices : IDisposable
     public List<(string Path, string Message)> ThemeErrors { get; } = [];
 
     /// <param name="dataDirectory">Defaults to the per-user data folder; pass one for portable use or tests.</param>
+    /// <summary>True when the sensors come from this Linux computer rather than a remote LibreHardwareMonitor.</summary>
+    public bool UsesLocalSensors => Settings.UseLocalSensors && LinuxSensorReader.IsSupported;
+
     public static AppServices Create(string? dataDirectory = null)
     {
         var services = new AppServices(dataDirectory ?? SettingsStore.DefaultDataDirectory);
@@ -105,17 +108,24 @@ public sealed class AppServices : IDisposable
     }
 
     /// <summary>Starts (or restarts) polling LHM for the given theme.</summary>
-    public bool StartPolling(ThemeDocument theme, out string? error)
+    public bool StartPolling(int updateInterval, out string? error)
     {
+        Hub.Latitude = Settings.Latitude;
+        Hub.Longitude = Settings.Longitude;
+        if (UsesLocalSensors)
+        {
+            Hub.StartLocal(updateInterval);
+            error = null;
+            return true;
+        }
+
         if (!LhmClient.TryNormalizeUrl(Settings.LhmUrl, out var url))
         {
             error = $"'{Settings.LhmUrl}' is not a valid address.";
             return false;
         }
 
-        Hub.Latitude = Settings.Latitude;
-        Hub.Longitude = Settings.Longitude;
-        Hub.Start(url, theme.UpdateInterval);
+        Hub.Start(url, updateInterval);
         error = null;
         return true;
     }

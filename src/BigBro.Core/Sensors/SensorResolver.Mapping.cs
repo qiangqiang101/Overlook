@@ -10,7 +10,17 @@ public sealed partial class SensorResolver
     {
         if (string.IsNullOrWhiteSpace(param)) return null;
         var key = param.Trim();
+        if (PortableSensors.IsAlias(key)) return PortableSensor(key);
         return key.StartsWith('/') ? _s.ById(key) : _s.ByPath(key);
+    }
+
+    /// <summary>"@CpuLoadPercent" or "@CpuFan:2": a 1.x sensor role (with an optional index) looked up on this machine.</summary>
+    private LhmSensor? PortableSensor(string alias)
+    {
+        var parts = alias[1..].Split(':', 2);
+        return Enum.TryParse<LegacySensorKind>(parts[0], ignoreCase: true, out var kind)
+            ? SensorFor(kind, parts.Length > 1 ? parts[1] : null)
+            : null;
     }
 
     /// <summary>

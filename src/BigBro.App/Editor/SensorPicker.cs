@@ -21,15 +21,15 @@ public sealed class SensorPicker : Button
     private readonly string _noneText;
     private SensorBinding? _value;
 
-    public SensorPicker(SensorSnapshot snapshot, bool includeSpecials, string noneText = "(none - shows the text you type)")
+    public SensorPicker(SensorSnapshot snapshot, bool includeSpecials, string? noneText = null)
         : this(() => Task.FromResult(snapshot), includeSpecials, noneText) { }
 
     /// <param name="snapshot">Read each time the list is opened, so a late connection still shows its sensors.</param>
-    public SensorPicker(Func<Task<SensorSnapshot>> snapshot, bool includeSpecials, string noneText = "(none - shows the text you type)")
+    public SensorPicker(Func<Task<SensorSnapshot>> snapshot, bool includeSpecials, string? noneText = null)
     {
         _snapshot = snapshot;
         _includeSpecials = includeSpecials;
-        _noneText = noneText;
+        _noneText = noneText ?? Loc.T("picker.none", "(none - shows the text you type)");
         HorizontalAlignment = HorizontalAlignment.Stretch;
         HorizontalContentAlignment = HorizontalAlignment.Left;
         Click += async (_, _) => await ChooseAsync();
@@ -65,8 +65,8 @@ public sealed class SensorPicker : Button
     private void Describe()
     {
         var text = _value is null || _value.Kind == SensorKind.None ? _noneText
-            : _value.Kind == SensorKind.Lhm ? (string.IsNullOrEmpty(_value.Param) ? "(choose a sensor)" : _value.Param)
-            : $"Special: {_value.Kind}";
+            : _value.Kind == SensorKind.Lhm ? (string.IsNullOrEmpty(_value.Param) ? "(choose a sensor)" : PortableSensors.NameOf(_value.Param) is { } portable ? Loc.T("picker.portableValue", "{0} (any PC)", portable) : _value.Param)
+            : Loc.T("picker.specialValue", "Special: {0}", UiText.EnumValue(_value.Kind));
         Content = new TextBlock { Text = text, TextTrimming = TextTrimming.CharacterEllipsis };
         ToolTip.SetTip(this, text);
     }
@@ -88,13 +88,15 @@ internal sealed class SensorPickerWindow : Window
         ShowInTaskbar = false;
 
         var choices = new List<Choice> { new(noneText, "", "", SensorKind.None, null) };
+        // sensors named by role: they find the right hardware on whatever PC the theme runs on
+        choices.AddRange(PortableSensors.All.Select(p => new Choice(PortableSensors.NameOf(p.Alias)!, Loc.T("picker.portable", "Any PC (found automatically)"), "", SensorKind.Lhm, p.Alias)));
         choices.AddRange(snapshot.Sensors.Select(s =>
         {
             var cut = s.Path.LastIndexOf('/');
             return new Choice(cut < 0 ? s.Path : s.Path[(cut + 1)..], cut < 0 ? "" : s.Path[..cut], s.DisplayValue, SensorKind.Lhm, s.Path);
         }));
         if (includeSpecials)
-            choices.AddRange(SensorKinds.Specials.Select(k => new Choice(k.ToString(), Loc.T("picker.special", "Special"), "", k, null)));
+            choices.AddRange(SensorKinds.Specials.Select(k => new Choice(UiText.EnumValue(k), Loc.T("picker.special", "Special"), "", k, null)));
 
         var search = new TextBox { PlaceholderText = Loc.T("picker.search", "Search: e.g. cpu load, gpu temperature, fan") };
         var count = new TextBlock { Opacity = 0.6, Margin = new Thickness(2, 6, 0, 0) };

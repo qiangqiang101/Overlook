@@ -1,5 +1,6 @@
 using System.Text.Json;
 using BigBro.Core.Rgb;
+using BigBro.Core.Settings;
 
 namespace BigBro.App.Rendering;
 
@@ -62,12 +63,12 @@ public sealed class RgbService : IDisposable
     {
         get
         {
-            if (!Settings.Listen) return "Listening is off; showing the offline effect.";
+            if (!Settings.Listen) return Loc.T("rgb.off", "Listening is off; showing the offline effect.");
             if (Source.Error is { } error) return error;
-            if (!Source.IsListening) return $"Not listening yet (UDP port {Settings.Port}); it starts when a theme with an RGB background is shown.";
+            if (!Source.IsListening) return Loc.T("rgb.notYet", "Not listening yet (UDP port {0}); it starts when a theme with an RGB background is shown.", Settings.Port);
             return Source.HasLiveFrames
-                ? $"Receiving lighting on UDP port {Settings.Port}."
-                : $"Waiting for SignalRGB / OpenRGB / RGBJunkie on UDP port {Settings.Port}; showing the offline effect.";
+                ? Loc.T("rgb.receiving", "Receiving lighting on UDP port {0}.", Settings.Port)
+                : Loc.T("rgb.waiting", "Waiting for SignalRGB / OpenRGB / RGBJunkie on UDP port {0}; showing the offline effect.", Settings.Port);
         }
     }
 

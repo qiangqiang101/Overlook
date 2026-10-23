@@ -24,6 +24,8 @@ A binding is `{ "kind": "lhm", "param": "ROGPC2/Intel Core i5-14600K/Load/CPU To
 (`Computer/Hardware/[Chip/]Group/Name`). A theme made on another PC still works if the hardware names match (the computer name is ignored when it doesn't).
 An LHM sensor id such as `/intelcpu/0/load/0` is accepted as well.
 
+**Portable sensors.** A `param` that starts with `@` names a sensor by what it measures instead of by one PC's hardware path, and Overlook finds the matching sensor on whatever PC (or Linux machine) it runs on: `@CpuLoadPercent`, `@CpuTemperatureC`, `@CpuClockSpeed`, `@CpuPowerWattage`, `@CpuFan:1` (the index picks the fan), `@GpuLoadPercent`, `@GpuTemperatureC`, `@GpuClockSpeed`, `@GpuMemoryClock`, `@GpuPowerWattage`, `@GpuFan`, `@GpuMemoryPercent`, `@GpuVramUsage`, `@RamLoadPercent`, `@RamUsage`, `@RamAvailable`, `@MoboTemperatureC`, `@DownloadSpeed`, `@UploadSpeed`. They are in the sensor picker under "Any PC". The bundled themes use them, so they work without choosing sensors first.
+
 A few values don't come from one LibreHardwareMonitor sensor and keep a `kind` (`param` as noted): `longDate`, `shortDate`, `longTime`, `shortTime`,
 `customDateTime` (.NET format), `systemUptime`, `ping` (host), `hddTotalSize` / `hddTotalFreeSpace` / `hddUsage` (drive), `displayScreenResolution`,
 `displayRefreshRate`, `displayFramerate`, `displayFrametime`, `cpuCoreCount`, `ramTotal`, `ramClockSpeed`, `ramVirtualTotal` and the `weather*` kinds.

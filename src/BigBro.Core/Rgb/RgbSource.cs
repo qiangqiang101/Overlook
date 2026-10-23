@@ -57,8 +57,8 @@ public sealed class RgbSource : IDisposable
         catch (Exception ex) when (ex is SocketException or ObjectDisposedException)
         {
             Error = ex is SocketException { SocketErrorCode: SocketError.AccessDenied or SocketError.AddressAlreadyInUse }
-                ? $"UDP port {port} is already taken by another program (RGB Wallpaper?) that does not allow sharing it. Close it, use a different port, or make that program open its socket with address reuse."
-                : $"Could not listen on UDP port {port}: {ex.Message}";
+                ? BigBro.Core.Settings.Loc.T("rgb.portTaken", "UDP port {0} is already taken by another program (RGB Wallpaper?) that does not allow sharing it. Close it, use a different port, or make that program open its socket with address reuse.", port)
+                : BigBro.Core.Settings.Loc.T("rgb.cannotListen", "Could not listen on UDP port {0}: {1}", port, ex.Message);
             IsListening = false;
         }
     }

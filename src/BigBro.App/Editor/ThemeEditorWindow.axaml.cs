@@ -182,7 +182,7 @@ public sealed partial class ThemeEditorWindow : Window
 
         foreach (var (type, label, _) in ElementFactory.Types)
         {
-            var item = new MenuItem { Header = label };
+            var item = new MenuItem { Header = ElementFactory.LocalLabel(type, label) };
             var t = type;
             item.Click += (_, _) => AddElement(t);
             AddMenu.Items.Add(item);
@@ -237,6 +237,8 @@ public sealed partial class ThemeEditorWindow : Window
         FitItem.Header = Loc.T("editor.fit", "_Fit to window");
         ToolsMenu.Header = Loc.T("editor.menuTools", "_Tools");
         PreviewItem.Header = Loc.T("editor.preview", "Update _preview image");
+        ElementTab.Header = Loc.T("editor.tabElement", "Element");
+        ThemeTab.Header = Loc.T("editor.tabTheme", "Theme");
     }
 
     // ------------------------------------------------------------------ view / data
@@ -762,7 +764,13 @@ public sealed partial class ThemeEditorWindow : Window
         if (!hub.Snapshot.IsEmpty)
             return (hub.Snapshot, Loc.T("mapping.live", "Suggestions come from {0}, the PC you are connected to.", hub.Snapshot.ComputerName), false);
 
-        if (LhmClient.TryNormalizeUrl(_services.Settings.LhmUrl, out var url))
+        if (_services.UsesLocalSensors)
+        {
+            var local = await Task.Run(SensorHub.ReadLocalOnce);
+            if (!local.IsEmpty)
+                return (local, Loc.T("mapping.local", "Suggestions come from {0}, this computer.", local.ComputerName), false);
+        }
+        else if (LhmClient.TryNormalizeUrl(_services.Settings.LhmUrl, out var url))
         {
             try
             {
@@ -890,6 +898,7 @@ public sealed partial class ThemeEditorWindow : Window
             return;
         }
         var (ax, ay) = ElementFactory.AbsolutePosition(doc, e);
-        StatusText.Text = $"{e.Name}  ·  {ElementFactory.LabelOf(e)}  ·  x {e.X}, y {e.Y}  ·  {e.Width} x {e.Height}  ·  on panel ({ax}, {ay})    |    theme {theme}";
+        StatusText.Text = Loc.T("editor.statusElement", "{0}  ·  {1}  ·  x {2}, y {3}  ·  {4} x {5}  ·  on panel ({6}, {7})    |    theme {8}",
+            e.Name, ElementFactory.LabelOf(e), e.X, e.Y, e.Width, e.Height, ax, ay, theme);
     }
 }

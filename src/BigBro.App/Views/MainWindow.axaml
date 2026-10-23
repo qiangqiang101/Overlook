@@ -3,38 +3,53 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="using:BigBro.App.Views"
+        xmlns:sys="using:System"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
         x:Class="BigBro.App.Views.MainWindow"
         Title="Overlook"
-        Width="1000" Height="720" MinWidth="820" MinHeight="540"
+        Width="1360" Height="800" MinWidth="960" MinHeight="560"
         WindowStartupLocation="CenterScreen">
 
 
     <Grid RowDefinitions="*,Auto">
-        <Grid Grid.Row="0" ColumnDefinitions="310,*">
+        <Grid Grid.Row="0" ColumnDefinitions="7*,3*">
 
             <!-- Theme list -->
             <Border Grid.Column="0" Classes="sidebar">
             <DockPanel Margin="16,16,12,10" LastChildFill="True">
                 <TextBlock x:Name="ThemesHeading" DockPanel.Dock="Top" Classes="heading" Text="Themes" Margin="0,0,0,8" />
                 <TextBox DockPanel.Dock="Top" x:Name="SearchBox" PlaceholderText="Search name, size or tag" Margin="0,0,0,8" />
-                <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,8,0,0">
-                    <Button x:Name="EditorButton" HorizontalAlignment="Stretch" Content="Theme editor..." />
-                    <Button x:Name="OpenFolderButton" HorizontalAlignment="Stretch" Content="Open themes folder" />
-                </StackPanel>
-                <ListBox x:Name="ThemeList">
+                <UniformGrid DockPanel.Dock="Bottom" Columns="3" Margin="0,8,0,0">
+                    <Button x:Name="EditorButton" HorizontalAlignment="Stretch" Margin="0,0,3,0" Content="Theme editor..." />
+                    <Button x:Name="OpenFolderButton" HorizontalAlignment="Stretch" Margin="3,0" Content="Open themes folder" />
+                    <Button x:Name="SettingsButton" HorizontalAlignment="Stretch" Margin="3,0,0,0" Content="Settings..." />
+                </UniformGrid>
+                <ListBox x:Name="ThemeList" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.Resources>
+                        <sys:Double x:Key="CardWidth">200</sys:Double>
+                        <sys:Double x:Key="PreviewHeight">100</sys:Double>
+                    </ListBox.Resources>
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="8" />
+                            <Setter Property="Margin" Value="4" />
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="views:ThemeItem">
-                            <Grid ColumnDefinitions="96,*" Margin="0,4">
-                                <Border Grid.Column="0" Width="88" Height="54" CornerRadius="4" ClipToBounds="True"
+                            <StackPanel Width="{DynamicResource CardWidth}" Spacing="6">
+                                <Border Height="{DynamicResource PreviewHeight}" CornerRadius="4" ClipToBounds="True"
                                         Background="{DynamicResource ControlFillColorSecondaryBrush}">
-                                    <Image Source="{Binding Preview}" Stretch="UniformToFill" />
+                                    <Image Source="{Binding Preview}" Stretch="Uniform" />
                                 </Border>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="{Binding Details}" Classes="hint" FontSize="12" TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </Grid>
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding Details}" Classes="hint" FontSize="12" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
@@ -43,7 +58,6 @@
 
             <!-- Selected theme -->
             <DockPanel Grid.Column="1" Margin="8,16,16,8">
-                <Button DockPanel.Dock="Top" x:Name="SettingsButton" Content="Settings..." HorizontalAlignment="Right" Margin="0,0,0,10" />
                 <ScrollViewer>
                     <Border Classes="card">
                         <StackPanel Spacing="10">

@@ -18,7 +18,7 @@ public sealed class ElementNode : INotifyPropertyChanged
     public ObservableCollection<ElementNode> Children { get; } = [];
     public bool IsExpanded { get; set; } = true;
 
-    public string Header => $"{(Element.Visible ? "" : "(hidden) ")}{Element.Name}  ·  {ElementFactory.LabelOf(Element)}";
+    public string Header => $"{(Element.Visible ? "" : BigBro.Core.Settings.Loc.T("editor.hidden", "(hidden) "))}{Element.Name}  ·  {ElementFactory.LabelOf(Element)}";
 
     public void Refresh() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Header)));
 

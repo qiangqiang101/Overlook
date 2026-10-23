@@ -99,12 +99,12 @@
                 <TextBlock x:Name="PropertiesHeading" Classes="heading" Text="Properties" VerticalAlignment="Center" />
             </DockPanel>
             <TabControl x:Name="SideTabs">
-                <TabItem Header="Element">
+                <TabItem x:Name="ElementTab" Header="Element">
                     <ScrollViewer>
                         <StackPanel x:Name="ElementPanel" Margin="8" Spacing="8" />
                     </ScrollViewer>
                 </TabItem>
-                <TabItem Header="Theme">
+                <TabItem x:Name="ThemeTab" Header="Theme">
                     <ScrollViewer>
                         <StackPanel x:Name="ThemePanel" Margin="8" Spacing="8" />
                     </ScrollViewer>

@@ -203,3 +203,34 @@ public class SensorResolverTests
         Assert.Equal("Cpu Load Percent", LegacySensors.Describe(LegacySensorKind.CpuLoadPercent, null));
     }
 }
+
+public class PortableSensorTests
+{
+    private static SensorResolver Resolver() =>
+        new(LhmParserTests.LoadFixture(), new LocalInfo(), WeatherData.Unknown);
+
+    [Fact]
+    public void Every_portable_sensor_finds_a_sensor_on_a_normal_pc()
+    {
+        var resolver = Resolver();
+        foreach (var (alias, _) in PortableSensors.All)
+        {
+            if (alias == "@GpuPowerWattage") continue;           // the RTX 4060 in the fixture reports no power sensor
+            var reading = resolver.Resolve(new SensorBinding { Kind = SensorKind.Lhm, Param = alias });
+            Assert.False(string.IsNullOrEmpty(reading.Text), $"{alias} found nothing");
+        }
+    }
+
+    [Fact]
+    public void Portable_cpu_load_reads_the_same_sensor_as_its_path()
+    {
+        var resolver = Resolver();
+        var byAlias = resolver.Resolve(new SensorBinding { Kind = SensorKind.Lhm, Param = "@CpuLoadPercent" });
+        var byPath = resolver.Resolve(new SensorBinding { Kind = SensorKind.Lhm, Param = "ROGPC2/Intel Core i5-14600K/Load/CPU Total" });
+        Assert.Equal(byPath.Text, byAlias.Text);
+    }
+
+    [Fact]
+    public void Unknown_alias_reads_as_empty() =>
+        Assert.True(string.IsNullOrEmpty(Resolver().Resolve(new SensorBinding { Kind = SensorKind.Lhm, Param = "@Nonsense" }).Text));
+}

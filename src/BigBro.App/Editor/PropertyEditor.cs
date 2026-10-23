@@ -34,19 +34,6 @@ public static class PropertyEditor
     private static readonly HashSet<string> Hidden = ["Children", "Elements", "Directory", "FormatVersion", "SizePx"];
     private static readonly HashSet<string> ImageProperties = ["Image", "BackgroundImage", "Texture", "Preview"];
 
-    private static readonly Dictionary<string, string> Labels = new()
-    {
-        ["BackColor"] = "Background color",
-        ["ForeColor"] = "Text color",
-        ["X"] = "X (left)",
-        ["Y"] = "Y (top)",
-        ["UpdateInterval"] = "Update interval (ms)",
-        ["Size"] = "Size (pt)",
-        ["Opacity"] = "Opacity (0-1)",
-        ["Rgb"] = "RGB background",
-        ["YoutubeId"] = "YouTube video id",
-    };
-
     /// <summary>Builds the editor for <paramref name="target"/>; <paramref name="rebuild"/> is called when the set of rows must change.</summary>
     public static StackPanel Build(object target, EditorContext ctx, Action rebuild, bool skipSensor = false)
     {
@@ -68,14 +55,7 @@ public static class PropertyEditor
         }
     }
 
-    private static string Label(PropertyInfo p) =>
-        Labels.TryGetValue(p.Name, out var l) ? l : SplitWords(p.Name);
-
-    private static string SplitWords(string name)
-    {
-        var spaced = System.Text.RegularExpressions.Regex.Replace(name, "(?<=[a-z0-9])(?=[A-Z])", " ");
-        return char.ToUpperInvariant(spaced[0]) + spaced[1..].ToLowerInvariant();
-    }
+    private static string Label(PropertyInfo p) => UiText.Property(p.Name);
 
     private static readonly NullabilityInfoContext Nullability = new();
 
@@ -105,11 +85,16 @@ public static class PropertyEditor
             return Row(label, Number(type, p.GetValue(target)!, v => ctx.Apply(() => p.SetValue(target, v))));
         if (type.IsEnum)
         {
-            var combo = new ComboBox { ItemsSource = Enum.GetNames(type), SelectedItem = p.GetValue(target)!.ToString(), HorizontalAlignment = HorizontalAlignment.Stretch };
+            var choices = Enum.GetNames(type).Select(n => new EnumChoice(n, UiText.EnumValue(type, n))).ToList();
+            var combo = new ComboBox
+            {
+                ItemsSource = choices, SelectedItem = choices.First(c => c.Name == p.GetValue(target)!.ToString()),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
             combo.SelectionChanged += (_, _) =>
             {
-                if (combo.SelectedItem is string s && s != p.GetValue(target)!.ToString())
-                    ctx.Apply(() => p.SetValue(target, Enum.Parse(type, s)));
+                if (combo.SelectedItem is EnumChoice chosen && chosen.Name != p.GetValue(target)!.ToString())
+                    ctx.Apply(() => p.SetValue(target, Enum.Parse(type, chosen.Name)));
             };
             return Row(label, combo);
         }
@@ -128,7 +113,7 @@ public static class PropertyEditor
         if (type == typeof(ThemeFont))
             return Group(label, BuildFont((ThemeFont)p.GetValue(target)!, ctx), expanded: false);
         if (type == typeof(SensorBinding))
-            return Group("Sensor", BuildSensor(target, p, ctx, rebuild), expanded: true);
+            return Group(Loc.T("editor.sensor", "Sensor"), BuildSensor(target, p, ctx, rebuild), expanded: true);
         if (type == typeof(RgbBackground))
             return BuildOptionalNested(target, p, label, ctx, rebuild, () => new RgbBackground());
         if (type == typeof(List<string>))
@@ -149,7 +134,7 @@ public static class PropertyEditor
             for (var i = 0; i < colors.Count; i++)
             {
                 var index = i;
-                inner.Children.Add(Row($"Color {i + 1}", ColorField(colors[i], c => ctx.Apply(() => colors[index] = c))));
+                inner.Children.Add(Row(Loc.T("editor.colorN", "Color {0}", i + 1), ColorField(colors[i], c => ctx.Apply(() => colors[index] = c))));
             }
             return Group(label, inner, expanded: false);
         }
@@ -158,6 +143,12 @@ public static class PropertyEditor
         if (type.IsClass && type != typeof(string) && !typeof(IEnumerable).IsAssignableFrom(type) && p.GetValue(target) is { } nested)
             return Group(label, Build(nested, ctx, rebuild), expanded: false);
         return null;
+    }
+
+    /// <summary>An enum value in a drop-down: <see cref="ToString"/> is the translated text, <see cref="Name"/> the value.</summary>
+    public sealed record EnumChoice(string Name, string Text)
+    {
+        public override string ToString() => Text;
     }
 
     // ------------------------------------------------------------------ pieces
@@ -263,15 +254,15 @@ public static class PropertyEditor
             Text = DescribeImage(value),
             VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis,
         };
-        var choose = new Button { Content = "Choose..." };
+        var choose = new Button { Content = Loc.T("main.choose", "Choose...") };
         var clear = new Button { Content = "x" };
-        ToolTip.SetTip(clear, "Remove image");
+        ToolTip.SetTip(clear, Loc.T("editor.removeImage", "Remove image"));
 
         choose.Click += async (_, _) =>
         {
             var files = await ctx.Owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
-                Title = "Choose an image",
+                Title = Loc.T("editor.chooseImage", "Choose an image"),
                 FileTypeFilter = [FilePickerFileTypes.ImageAll],
             });
             if (files.Count == 0 || files[0].TryGetLocalPath() is not { } local) return;
@@ -281,7 +272,7 @@ public static class PropertyEditor
             set(rel);
             name.Text = DescribeImage(rel);
         };
-        clear.Click += (_, _) => { set(null); name.Text = "(none)"; };
+        clear.Click += (_, _) => { set(null); name.Text = DescribeImage(null); };
 
         var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"), ColumnSpacing = 6 };
         grid.Children.Add(name);
@@ -294,10 +285,10 @@ public static class PropertyEditor
 
     private static string DescribeImage(string? value)
     {
-        if (string.IsNullOrEmpty(value)) return "(none)";
+        if (string.IsNullOrEmpty(value)) return Loc.T("editor.imageNone", "(none)");
         if (!ImageData.IsEmbedded(value)) return Path.GetFileName(value);
         var mime = value.StartsWith("data:", StringComparison.OrdinalIgnoreCase) ? value[5..Math.Max(5, value.IndexOf(';'))] : "image";
-        return $"{mime.Replace("image/", "").ToUpperInvariant()} image, {value.Length * 3 / 4 / 1024:N0} KB (embedded)";
+        return Loc.T("editor.imageEmbedded", "{0} image, {1} KB (embedded)", mime.Replace("image/", "").ToUpperInvariant(), (value.Length * 3 / 4 / 1024).ToString("N0"));
     }
 
     private static Control BuildFont(ThemeFont font, EditorContext ctx)
@@ -315,9 +306,9 @@ public static class PropertyEditor
         {
             if (family.SelectedItem is string chosen && chosen != font.Family) ctx.Apply(() => font.Family = chosen);
         };
-        panel.Children.Add(Row("Family", family));
+        panel.Children.Add(Row(Loc.T("editor.family", "Family"), family));
 
-        panel.Children.Add(Row("Size (pt)", Number(typeof(double), font.Size, v => ctx.Apply(() => font.Size = Math.Max(1, (double)v)))));
+        panel.Children.Add(Row(UiText.Property("Size"), Number(typeof(double), font.Size, v => ctx.Apply(() => font.Size = Math.Max(1, (double)v)))));
 
         CheckBox Flag(string text, bool value, Action<bool> set)
         {
@@ -329,8 +320,8 @@ public static class PropertyEditor
         {
             Children =
             {
-                Flag("Bold", font.Bold, v => font.Bold = v), Flag("Italic", font.Italic, v => font.Italic = v),
-                Flag("Underline", font.Underline, v => font.Underline = v), Flag("Strikeout", font.Strikeout, v => font.Strikeout = v),
+                Flag(UiText.Property("Bold"), font.Bold, v => font.Bold = v), Flag(UiText.Property("Italic"), font.Italic, v => font.Italic = v),
+                Flag(UiText.Property("Underline"), font.Underline, v => font.Underline = v), Flag(UiText.Property("Strikeout"), font.Strikeout, v => font.Strikeout = v),
             },
         });
         return panel;
@@ -340,9 +331,9 @@ public static class PropertyEditor
     {
         var snapshot = ctx.Sensors();
         var picker = new SensorPicker(snapshot, includeSpecials: true) { Value = (SensorBinding?)p.GetValue(target) };
-        var param = new TextBox { PlaceholderText = "optional" };
+        var param = new TextBox { PlaceholderText = Loc.T("editor.optional", "optional") };
         var hint = new TextBlock { Opacity = 0.7, TextWrapping = TextWrapping.Wrap, FontSize = 12 };
-        var paramRow = Row("Parameter", param);
+        var paramRow = Row(Loc.T("editor.parameter", "Parameter"), param);
 
         void Refresh()
         {
@@ -350,11 +341,7 @@ public static class PropertyEditor
             var special = b is not null && SensorKinds.IsSpecial(b.Kind);
             paramRow.IsVisible = special;
             param.Text = b?.Param;
-            hint.Text = b?.Kind == SensorKind.Lhm
-                ? (snapshot.ByPath(b.Param ?? "") is { } s || snapshot.ById(b.Param ?? "") is { } s2
-                    ? $"Current value: {(snapshot.ByPath(b.Param ?? "") ?? snapshot.ById(b.Param ?? ""))!.DisplayValue}"
-                    : "No sensor with this path in the data shown here; it will read as empty.")
-                : HintFor(b?.Kind);
+            hint.Text = b?.Kind == SensorKind.Lhm ? LhmHint(snapshot, b) : HintFor(b?.Kind);
         }
 
         picker.Picked += binding =>
@@ -371,17 +358,34 @@ public static class PropertyEditor
         });
 
         Refresh();
-        return new StackPanel { Spacing = 6, Children = { Row("Source", picker), paramRow, hint } };
+        return new StackPanel { Spacing = 6, Children = { Row(Loc.T("editor.source", "Source"), picker), paramRow, hint } };
+    }
+
+    private static string LhmHint(SensorSnapshot snapshot, SensorBinding b)
+    {
+        // a portable sensor ("@CpuLoadPercent") is looked up by role, so ask the resolver what it finds here
+        if (PortableSensors.IsAlias(b.Param))
+        {
+            var reading = new SensorResolver(snapshot, new LocalInfo()).Resolve(b);
+            return string.IsNullOrEmpty(reading.Text)
+                ? Loc.T("editor.noPortable", "This PC has no matching sensor in the data shown here; it will read as empty.")
+                : Loc.T("editor.currentValue", "Current value: {0}", reading.Text);
+        }
+
+        var sensor = snapshot.ByPath(b.Param ?? "") ?? snapshot.ById(b.Param ?? "");
+        return sensor is null
+            ? Loc.T("editor.noSuchSensor", "No sensor with this path in the data shown here; it will read as empty.")
+            : Loc.T("editor.currentValue", "Current value: {0}", sensor.DisplayValue);
     }
 
     private static string HintFor(SensorKind? kind) => kind switch
     {
-        null or SensorKind.None => "Not bound: shows the text you type.",
-        SensorKind.HddTotalSize or SensorKind.HddTotalFreeSpace or SensorKind.HddUsage => @"Parameter: drive of this computer, e.g. C:\ or /.",
-        SensorKind.Ping => "Parameter: host to ping (default 8.8.8.8).",
-        SensorKind.CustomDateTime => "Parameter: .NET date format, e.g. dddd dd MMMM yyyy HH:mm:ss.",
-        SensorKind.SystemUptime => @"Parameter: time format, e.g. d\.hh\:mm\:ss.",
-        _ => "No parameter needed.",
+        null or SensorKind.None => Loc.T("editor.hintNone", "Not bound: shows the text you type."),
+        SensorKind.HddTotalSize or SensorKind.HddTotalFreeSpace or SensorKind.HddUsage => Loc.T("editor.hintDrive", @"Parameter: drive of this computer, e.g. C:\ or /."),
+        SensorKind.Ping => Loc.T("editor.hintPing", "Parameter: host to ping (default 8.8.8.8)."),
+        SensorKind.CustomDateTime => Loc.T("editor.hintDate", "Parameter: .NET date format, e.g. dddd dd MMMM yyyy HH:mm:ss."),
+        SensorKind.SystemUptime => Loc.T("editor.hintUptime", @"Parameter: time format, e.g. d\.hh\:mm\:ss."),
+        _ => Loc.T("editor.hintNoParam", "No parameter needed."),
     };
 
     private static Control BuildOptionalNested(object target, PropertyInfo p, string label, EditorContext ctx, Action rebuild, Func<object> create)
@@ -404,20 +408,20 @@ public static class PropertyEditor
         var panel = new StackPanel { Spacing = 8 };
         panel.Children.Add(new TextBlock
         {
-            Text = "The sensor's value (0-100 %) picks the image: index 0 for the lowest, the highest index for the top.",
+            Text = Loc.T("editor.dynamicHint", "The sensor's value (0-100 %) picks the image: index 0 for the lowest, the highest index for the top."),
             Opacity = 0.65, TextWrapping = TextWrapping.Wrap, FontSize = 12,
         });
 
         foreach (var image in images.OrderBy(i => i.Index).ToList())
         {
-            var remove = new Button { Content = "Remove" };
+            var remove = new Button { Content = Loc.T("editor.remove", "Remove") };
             remove.Click += (_, _) => { ctx.Apply(() => images.Remove(image)); rebuild(); };
             var inner = Build(image, ctx, rebuild);
             inner.Children.Add(remove);
             panel.Children.Add(Group($"[{image.Index}] {image.Name}", inner, expanded: false));
         }
 
-        var add = new Button { Content = "Add image" };
+        var add = new Button { Content = Loc.T("editor.addImage", "Add image") };
         add.Click += (_, _) =>
         {
             ctx.Apply(() => images.Add(new DynamicImage { Index = images.Count == 0 ? 0 : images.Max(i => i.Index) + 1, Name = $"Image {images.Count + 1}" }));

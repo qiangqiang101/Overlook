@@ -12,6 +12,12 @@ using BigBro.Core.Settings;
 
 namespace BigBro.App.Views;
 
+/// <summary>An enum value in a drop-down: <see cref="ToString"/> is the translated text, <see cref="Name"/> the value.</summary>
+internal sealed record PropertyEditorChoice(string Name, string Text)
+{
+    public override string ToString() => Text;
+}
+
 public sealed partial class SettingsWindow : Window
 {
     private readonly AppServices _services;
@@ -27,6 +33,10 @@ public sealed partial class SettingsWindow : Window
         Icon = AppIcon.Load();
         var s = services.Settings;
         UrlBox.Text = s.LhmUrl;
+        LocalSensorsBox.IsVisible = LinuxSensorReader.IsSupported;
+        LocalSensorsBox.IsChecked = s.UseLocalSensors;
+        LocalSensorsBox.IsCheckedChanged += (_, _) => UrlBox.IsEnabled = LocalSensorsBox.IsChecked != true;
+        UrlBox.IsEnabled = !(LocalSensorsBox.IsVisible && LocalSensorsBox.IsChecked == true);
         LatBox.Value = ParseCoordinate(s.Latitude);
         LonBox.Value = ParseCoordinate(s.Longitude);
         TopMostBox.IsChecked = s.TopMost;
@@ -52,10 +62,10 @@ public sealed partial class SettingsWindow : Window
             services.SaveSettings();
             ResetPositionButton.Content = Loc.T("settings.positionReset", "Position reset (applies next time the panel opens)");
         };
+        OpenLogsButton.Click += async (_, _) => await OpenLogsFolderAsync();
         OkButton.Click += async (_, _) => await ApplyAsync();
         CancelButton.Click += (_, _) => Close(false);
 
-        LocalInfoText.Text = DescribeLocal();
         ApplyLanguage();
     }
 
@@ -83,13 +93,30 @@ public sealed partial class SettingsWindow : Window
         TopMostBox.Content = Loc.T("settings.topMost", "Keep the panel on top of other windows");
         AutoShowBox.Content = Loc.T("settings.autoShow", "Show the panel automatically when Overlook starts");
         HqAudioBox.Content = Loc.T("settings.hqAudio", "High quality audio visualizer (smoother, uses more CPU)");
+        OpenLogsButton.Content = Loc.T("settings.openLogs", "Open logs folder");
         ResetPositionButton.Content = Loc.T("settings.resetPosition", "Reset the panel position");
         RgbHeading.Text = Loc.T("settings.rgb", "RGB background");
+        LocalSensorsBox.Content = Loc.T("settings.localSensors", "Use this computer's own sensors instead (LibreHardwareMonitor only exists on Windows)");
+        LatBox.PlaceholderText = Loc.T("settings.latExample", "e.g. 3.139");
+        LonBox.PlaceholderText = Loc.T("settings.lonExample", "e.g. 101.687");
+        RgbPortLabel.Text = Loc.T("settings.rgbPort", "UDP port");
+        RgbEffectLabel.Text = Loc.T("settings.rgbEffect", "When nothing is sending");
+        RgbShutdownLabel.Text = Loc.T("settings.rgbOfflineColor", "Offline colour");
+        RgbMatrixTypeLabel.Text = Loc.T("settings.rgbMatrixShape", "Matrix shape");
+        RgbMatrixTierLabel.Text = Loc.T("settings.rgbMatrixSize", "Matrix size");
+        RgbShapeLabel.Text = Loc.T("settings.rgbLedShape", "LED shape");
+        RgbRadiusLabel.Text = Loc.T("settings.rgbRadius", "Corner radius");
+        RgbPaddingLabel.Text = Loc.T("settings.rgbPadding", "LED padding");
+        RgbBlurLabel.Text = Loc.T("settings.rgbBlur", "Blur");
+        RgbFpsLabel.Text = Loc.T("settings.rgbFps", "Frames per second");
+        RgbBackgroundLabel.Text = Loc.T("settings.rgbBackground", "Background colour");
+        RgbCoverLabel.Text = Loc.T("settings.rgbCover", "Cover image");
+        RgbCoverBox.PlaceholderText = Loc.T("settings.rgbCoverHint", "path or http link (optional)");
+        RgbCoverButton.Content = Loc.T("main.choose", "Choose...");
+        RgbStretchLabel.Text = Loc.T("settings.rgbCoverFit", "Cover image fit");
         RgbHint.Text = Loc.T("settings.rgbHint", RgbHint.Text!);
         RgbListenBox.Content = Loc.T("settings.rgbListen", "Receive lighting data");
         RgbAppearance.Header = Loc.T("settings.rgbAppearance", "Appearance");
-        LocalHeading.Text = Loc.T("settings.local", "This computer");
-        LocalHint.Text = Loc.T("settings.localHint", LocalHint.Text!);
         OkButton.Content = Loc.T("common.ok", "OK");
         CancelButton.Content = Loc.T("common.cancel", "Cancel");
     }
@@ -122,7 +149,7 @@ public sealed partial class SettingsWindow : Window
         {
             var files = await StorageProvider.OpenFilePickerAsync(new Avalonia.Platform.Storage.FilePickerOpenOptions
             {
-                Title = "Cover image",
+                Title = Loc.T("settings.rgbCover", "Cover image"),
                 FileTypeFilter = [Avalonia.Platform.Storage.FilePickerFileTypes.ImageAll],
             });
             if (files.Count > 0 && files[0].TryGetLocalPath() is { } path) RgbCoverBox.Text = path;
@@ -131,12 +158,13 @@ public sealed partial class SettingsWindow : Window
 
     private static void Fill<T>(ComboBox box, T current) where T : struct, Enum
     {
-        box.ItemsSource = Enum.GetNames<T>();
-        box.SelectedItem = current.ToString();
+        var choices = Enum.GetNames<T>().Select(n => new PropertyEditorChoice(n, UiText.EnumValue(typeof(T), n))).ToList();
+        box.ItemsSource = choices;
+        box.SelectedItem = choices.First(c => c.Name == current.ToString());
     }
 
     private static T Pick<T>(ComboBox box, T fallback) where T : struct, Enum =>
-        box.SelectedItem is string name && Enum.TryParse<T>(name, out var v) ? v : fallback;
+        box.SelectedItem is PropertyEditorChoice choice && Enum.TryParse<T>(choice.Name, out var v) ? v : fallback;
 
     /// <returns>true if the port or the on/off state changed, so the receiver must be restarted.</returns>
     private bool SaveRgb()
@@ -200,20 +228,45 @@ public sealed partial class SettingsWindow : Window
         UpdateResult.Foreground = ok switch { true => Brushes.SeaGreen, false => Brushes.IndianRed, _ => null };
     }
 
+    private async Task OpenLogsFolderAsync()
+    {
+        try
+        {
+            Directory.CreateDirectory(CrashLog.Directory);          // nothing has been logged yet if the app never crashed
+            await Launcher.LaunchDirectoryInfoAsync(new DirectoryInfo(CrashLog.Directory));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            await Dialogs.ShowAsync(this, Title ?? "Settings", Loc.T("settings.logsFailed", "Could not open the logs folder: {0}", ex.Message));
+        }
+    }
+
     private string DescribeLocal()
     {
         var refresh = _services.Hub.Local.RefreshRate;
         var afterburner = !AfterburnerReader.IsSupported
-            ? "FPS counters: Windows only."
+            ? Loc.T("settings.fpsWindowsOnly", "FPS counters: Windows only.")
             : _services.Hub.Local.FramesPerSecond > 0 || _services.Hub.Local.FrameTimeMs > 0
-                ? "MSI Afterburner: connected."
-                : "MSI Afterburner: not detected (start Afterburner and RivaTuner, and enable the 'Framerate' counter).";
-        var audio = OperatingSystem.IsLinux() ? "Audio visualizer: needs 'parec' (pulseaudio-utils) to capture system audio." : "Audio visualizer: captures what this computer plays.";
-        return $"Display refresh rate: {(refresh > 0 ? $"{refresh:0} Hz" : "unknown")}.\n{afterburner}\n{audio}";
+                ? Loc.T("settings.afterburnerOk", "MSI Afterburner: connected.")
+                : Loc.T("settings.afterburnerMissing", "MSI Afterburner: not detected (start Afterburner and RivaTuner, and enable the 'Framerate' counter).");
+        var audio = OperatingSystem.IsLinux()
+            ? Loc.T("settings.audioLinux", "Audio visualizer: needs 'parec' (pulseaudio-utils) to capture system audio.")
+            : Loc.T("settings.audioWindows", "Audio visualizer: captures what this computer plays.");
+        var rate = refresh > 0 ? $"{refresh:0} Hz" : Loc.T("settings.unknown", "unknown");
+        return $"{Loc.T("settings.refreshRate", "Display refresh rate: {0}.", rate)}\n{afterburner}\n{audio}";
     }
 
     private async void OnTestClick(object? sender, RoutedEventArgs e)
     {
+        if (LocalSensorsBox.IsVisible && LocalSensorsBox.IsChecked == true)
+        {
+            var local = await Task.Run(SensorHub.ReadLocalOnce);
+            SetTestResult(local.IsEmpty
+                ? Loc.T("settings.localEmpty", "This computer exposes no readable sensors (no /sys/class/hwmon data and no nvidia-smi).")
+                : Loc.T("settings.localFound", "Reading this computer: {0} sensors on {1} devices.", local.Sensors.Count, local.Hardware.Count), !local.IsEmpty);
+            return;
+        }
+
         if (!LhmClient.TryNormalizeUrl(UrlBox.Text, out var url))
         {
             SetTestResult(Loc.T("settings.badUrl", "That doesn't look like an address. Try something like 192.168.0.8:8085"), false);
@@ -257,6 +310,7 @@ public sealed partial class SettingsWindow : Window
     {
         var s = _services.Settings;
         s.LhmUrl = UrlBox.Text?.Trim() ?? "";
+        if (LocalSensorsBox.IsVisible) s.UseLocalSensors = LocalSensorsBox.IsChecked == true;
         s.Latitude = FormatCoordinate(LatBox.Value);
         s.Longitude = FormatCoordinate(LonBox.Value);
         s.TopMost = TopMostBox.IsChecked == true;

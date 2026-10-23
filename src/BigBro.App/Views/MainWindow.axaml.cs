@@ -35,6 +35,8 @@ public sealed partial class MainWindow : Window
         ThemeList.ItemsSource = _items;
 
         SearchBox.TextChanged += (_, _) => ApplyFilter();
+        ThemeList.SizeChanged += (_, _) => UpdateGallery();
+        PositionChanged += (_, _) => UpdateGallery();         // the window may have moved to a display of another size
         ThemeList.SelectionChanged += (_, _) => ShowSelected();
         ShowButton.Click += (_, _) => ShowPanel();
         HideButton.Click += (_, _) => HidePanel();
@@ -58,8 +60,11 @@ public sealed partial class MainWindow : Window
         ApplyLanguage();
         Opened += (_, _) =>
         {
+            UpdateGallery();
             if (services.Settings.AutoShowMonitor && ThemeList.SelectedItem is not null) ShowPanel();
             if (services.Settings.CheckForUpdates) _ = CheckForUpdateAsync();
+            // reading the theme list and decoding its thumbnails leaves a lot of garbage; hand it back once the gallery has settled
+            DispatcherTimer.RunOnce(TrimMemory, TimeSpan.FromSeconds(6));
         };
     }
 
@@ -77,6 +82,28 @@ public sealed partial class MainWindow : Window
             try { await Launcher.LaunchUriAsync(new Uri(update.Url)); }
             catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception) { }
         };
+    }
+
+    // ------------------------------------------------------------------ gallery
+
+    /// <summary>4 columns on smaller displays up to 6 on large ones, judged by the display's size in device-independent pixels.</summary>
+    private int GalleryColumns()
+    {
+        var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
+        var width = screen is null ? 1920 : screen.Bounds.Width / screen.Scaling;
+        var columns = width < 1700 ? 4 : width < 2300 ? 5 : 6;
+        return Math.Min(columns, Math.Max(2, (int)(ThemeList.Bounds.Width / 150)));        // a narrow window shows fewer
+    }
+
+    private void UpdateGallery()
+    {
+        if (ThemeList.Bounds.Width < 100) return;
+        const double itemChrome = 24, scrollBar = 18;
+        var columns = GalleryColumns();
+        var card = Math.Floor((ThemeList.Bounds.Width - scrollBar) / columns - itemChrome);
+        if (card < 60) return;
+        ThemeList.Resources["CardWidth"] = card;
+        ThemeList.Resources["PreviewHeight"] = Math.Round(card / 2);
     }
 
     internal void SelectForScreenshot(string? themeName)
@@ -148,6 +175,28 @@ public sealed partial class MainWindow : Window
 
     private ThemeEntry? Selected => (ThemeList.SelectedItem as ThemeItem)?.Entry;
 
+    /// <summary>The theme the panel is showing, if any.</summary>
+    private ThemeEntry? _running;
+
+    /// <summary>
+    /// A theme's images make its file large, so only the theme that is selected (details) or running (panel) stays loaded;
+    /// every other one is dropped from memory as soon as the selection or the panel changes.
+    /// </summary>
+    private void ReleaseUnusedThemes()
+    {
+        var keep = new[] { Selected, _running };
+        foreach (var item in _allItems)
+            if (item.Entry.IsLoaded && !keep.Contains(item.Entry)) item.Entry.Release();
+    }
+
+    private static void TrimMemory()
+    {
+        System.Runtime.GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce;
+        GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+    }
+
+    private void ReleaseUnusedThemesSoon() => Dispatcher.UIThread.Post(ReleaseUnusedThemes, DispatcherPriority.Background);
+
     private void ShowSelected()
     {
         var entry = Selected;
@@ -155,14 +204,29 @@ public sealed partial class MainWindow : Window
         ThemeDetails.IsVisible = entry is not null;
         CustomizePanel.Children.Clear();
         CustomizeExpander.IsVisible = false;
+        ReleaseUnusedThemes();                      // the theme that was selected before is no longer needed
         if (entry is null) return;
 
-        var doc = entry.Document;
-        ThemeTitle.Text = doc.Name;
-        var tags = doc.Tags.Count > 0 ? "\n" + Loc.T("main.tags", "Tags: {0}", string.Join(", ", doc.Tags)) : "";
-        ThemeInfo.Text = $"{doc.Width} x {doc.Height}  ·  {Loc.T("main.version", "version {0}", doc.Version)}" +
-                         (string.IsNullOrWhiteSpace(doc.Author) ? "" : $"  ·  {Loc.T("main.by", "by {0}", doc.Author)}") +
-                         $"  ·  {Loc.T("main.updates", "updates every {0} s", (doc.UpdateInterval / 1000.0).ToString("0.#"))}{tags}";
+        var header = entry.Header;
+        ThemeTitle.Text = header.Name;
+        var tags = header.Tags.Count > 0 ? "\n" + Loc.T("main.tags", "Tags: {0}", string.Join(", ", header.Tags)) : "";
+        ThemeInfo.Text = $"{header.Width} x {header.Height}  ·  {Loc.T("main.version", "version {0}", header.Version)}" +
+                         (string.IsNullOrWhiteSpace(header.Author) ? "" : $"  ·  {Loc.T("main.by", "by {0}", header.Author)}") +
+                         $"  ·  {Loc.T("main.updates", "updates every {0} s", (header.UpdateInterval / 1000.0).ToString("0.#"))}{tags}";
+
+        ThemeDocument doc;
+        try
+        {
+            doc = entry.Document;
+        }
+        catch (Exception ex) when (ex is IOException or System.Text.Json.JsonException or InvalidDataException)
+        {
+            ThemeInfo.Text += "\n" + Loc.T("main.cannotLoad", "This theme can't be read: {0}", ex.Message);
+            ShowButton.IsEnabled = false;
+            PreviewImage.Source = null;
+            return;
+        }
+        ShowButton.IsEnabled = true;
 
         if (doc.NeedsSensors)
             ThemeInfo.Text += "\n" + Loc.T("main.needsSensors", "This theme still uses 1.x sensors. Open it in the theme editor to choose them.");
@@ -183,14 +247,13 @@ public sealed partial class MainWindow : Window
 
     // ------------------------------------------------------------------ customize
 
-    private static readonly Dictionary<SensorKind, string> ParamHints = new()
+    private static string? ParamHint(SensorKind kind) => kind switch
     {
-        [SensorKind.HddTotalSize] = @"Drive of this computer, e.g. C:\ or /",
-        [SensorKind.HddTotalFreeSpace] = @"Drive of this computer, e.g. C:\ or /",
-        [SensorKind.HddUsage] = @"Drive of this computer, e.g. C:\ or /",
-        [SensorKind.Ping] = "Host to ping, e.g. 8.8.8.8",
-        [SensorKind.CustomDateTime] = "Date format, e.g. dddd dd MMMM yyyy HH:mm",
-        [SensorKind.SystemUptime] = @"Format, e.g. d\.hh\:mm\:ss",
+        SensorKind.HddTotalSize or SensorKind.HddTotalFreeSpace or SensorKind.HddUsage => Loc.T("main.hintDrive", @"Drive of this computer, e.g. C:\ or /"),
+        SensorKind.Ping => Loc.T("main.hintPing", "Host to ping, e.g. 8.8.8.8"),
+        SensorKind.CustomDateTime => Loc.T("main.hintDate", "Date format, e.g. dddd dd MMMM yyyy HH:mm"),
+        SensorKind.SystemUptime => Loc.T("main.hintUptime", @"Format, e.g. d\.hh\:mm\:ss"),
+        _ => null,
     };
 
     private void BuildCustomizeRows(ThemeEntry entry)
@@ -203,7 +266,7 @@ public sealed partial class MainWindow : Window
             switch (el)
             {
                 case TextElement { AllowUserEdit: true, Sensor: null or { Kind: SensorKind.None } } t:
-                    AddRow(doc, el, $"Text of '{t.Name}'", t.Text, ov => ov.Text, (ov, v) => ov.Text = v);
+                    AddRow(doc, el, Loc.T("main.textOf", "Text of '{0}'", t.Name), t.Text, ov => ov.Text, (ov, v) => ov.Text = v);
                     rows++;
                     break;
                 case ImageElement { AllowUserEdit: true } i:
@@ -211,7 +274,7 @@ public sealed partial class MainWindow : Window
                     rows++;
                     break;
                 case YoutubeElement y:
-                    AddRow(doc, el, $"YouTube video id of '{y.Name}'", y.YoutubeId ?? "", ov => ov.YoutubeId, (ov, v) => ov.YoutubeId = v);
+                    AddRow(doc, el, Loc.T("main.youtubeOf", "YouTube video id of '{0}'", y.Name), y.YoutubeId ?? "", ov => ov.YoutubeId, (ov, v) => ov.YoutubeId = v);
                     rows++;
                     break;
             }
@@ -222,9 +285,9 @@ public sealed partial class MainWindow : Window
                 rows++;
             }
 
-            if (el.Sensor is { } s && ParamHints.TryGetValue(s.Kind, out var hint))
+            if (el.Sensor is { } s && ParamHint(s.Kind) is { } hint)
             {
-                AddRow(doc, el, $"'{el.Name}': {hint}", s.Param ?? "", ov => ov.Param, (ov, v) => ov.Param = v);
+                AddRow(doc, el, Loc.T("main.paramOf", "'{0}': {1}", el.Name, hint), s.Param ?? "", ov => ov.Param, (ov, v) => ov.Param = v);
                 rows++;
             }
         }
@@ -250,7 +313,9 @@ public sealed partial class MainWindow : Window
     private async Task<SensorSnapshot> LoadSnapshotAsync()
     {
         var snapshot = _services.Hub.Snapshot;
-        if (!snapshot.IsEmpty || !LhmClient.TryNormalizeUrl(_services.Settings.LhmUrl, out var url)) return snapshot;
+        if (!snapshot.IsEmpty) return snapshot;
+        if (_services.UsesLocalSensors) return await Task.Run(SensorHub.ReadLocalOnce);
+        if (!LhmClient.TryNormalizeUrl(_services.Settings.LhmUrl, out var url)) return snapshot;
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(6));
@@ -306,7 +371,7 @@ public sealed partial class MainWindow : Window
         {
             var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
-                Title = $"Image for '{el.Name}'",
+                Title = Loc.T("main.imageFor", "Image for '{0}'", el.Name),
                 FileTypeFilter = [FilePickerFileTypes.ImageAll],
             });
             if (files.Count == 0 || files[0].TryGetLocalPath() is not { } local) return;
@@ -325,7 +390,7 @@ public sealed partial class MainWindow : Window
         Grid.SetColumn(reset, 2);
         row.Children.Add(pick);
         row.Children.Add(reset);
-        CustomizePanel.Children.Add(Labeled($"Image of '{el.Name}'", row));
+        CustomizePanel.Children.Add(Labeled(Loc.T("main.imageOf", "Image of '{0}'", el.Name), row));
     }
 
     private static Control Labeled(string label, Control control) => new StackPanel
@@ -354,7 +419,7 @@ public sealed partial class MainWindow : Window
         var hub = _services.Hub;
         StatusText.Text = hub.State switch
         {
-            ConnectionState.Connected => Loc.T("status.connected", "Connected to {0}  ·  {1} sensors  ·  updated {2}", hub.Url?.Host ?? "", hub.Snapshot.Sensors.Count, DateTime.Now.ToString("T")),
+            ConnectionState.Connected => Loc.T("status.connected", "Connected to {0}  ·  {1} sensors  ·  updated {2}", hub.IsLocal ? Loc.T("status.thisComputer", "this computer") : hub.Url?.Host ?? "", hub.Snapshot.Sensors.Count, DateTime.Now.ToString("T")),
             ConnectionState.Error => Loc.T("status.error", "Connection problem: {0}", hub.LastError ?? ""),
             ConnectionState.Connecting => Loc.T("status.connecting", "Connecting..."),
             _ => Loc.T("status.stopped", "Not connected"),
@@ -367,7 +432,7 @@ public sealed partial class MainWindow : Window
         if (entry is null) return;
 
         _monitor?.Close();
-        if (!_services.StartPolling(entry.Document, out var error))
+        if (!_services.StartPolling(entry.Header.UpdateInterval, out var error))
         {
             TestResult.Text = Loc.T("main.badUrl", "{0} Open Settings to fix the sensor source address.", error!);
             TestResult.Foreground = Brushes.IndianRed;
@@ -378,14 +443,17 @@ public sealed partial class MainWindow : Window
         _services.Settings.CurrentTheme = entry.Name;
         _services.SaveSettings();
 
+        _running = entry;
         var monitor = new MonitorWindow(_services, entry);
         monitor.Closed += (_, _) =>
         {
             if (!ReferenceEquals(_monitor, monitor)) return;
             _monitor = null;
+            _running = null;
             HideButton.IsEnabled = false;
             _services.Hub.Stop();
             StatusText.Text = Loc.T("status.panelClosed", "Panel closed");
+            ReleaseUnusedThemesSoon();              // after the window has let go of the theme
         };
         _monitor = monitor;
         monitor.Show();

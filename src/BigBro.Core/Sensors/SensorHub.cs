@@ -35,6 +35,9 @@ public sealed class SensorHub : IDisposable
     public LocalInfo Local { get; } = new();
 
     public Uri? Url { get; private set; }
+
+    /// <summary>True while the sensors come from this Linux computer instead of a remote LibreHardwareMonitor.</summary>
+    public bool IsLocal { get; private set; }
     public ConnectionState State { get; private set; } = ConnectionState.Stopped;
     public string? LastError { get; private set; }
     public SensorSnapshot Snapshot => _snapshot;
@@ -56,12 +59,31 @@ public sealed class SensorHub : IDisposable
     {
         Stop();
         Url = url;
+        IsLocal = false;
+        Begin(intervalMs, ct => _client.FetchAsync(url, ct));
+    }
+
+    /// <summary>Polls this computer's own sensors (Linux: /proc and /sys, nvidia-smi) instead of a remote LibreHardwareMonitor.</summary>
+    public void StartLocal(int intervalMs)
+    {
+        Stop();
+        Url = null;
+        IsLocal = true;
+        var reader = new LinuxSensorReader();
+        Begin(intervalMs, ct => Task.Run(reader.Read, ct));
+    }
+
+    /// <summary>One reading of this computer's sensors; used to fill the sensor lists while nothing is polling.</summary>
+    public static SensorSnapshot ReadLocalOnce() => new LinuxSensorReader().Read();
+
+    private void Begin(int intervalMs, Func<CancellationToken, Task<SensorSnapshot>> fetch)
+    {
         IntervalMs = intervalMs;
         State = ConnectionState.Connecting;
         LastError = null;
         _cts = new CancellationTokenSource();
         var ct = _cts.Token;
-        _loop = Task.Run(() => RunAsync(url, ct), ct);
+        _loop = Task.Run(() => RunAsync(fetch, ct), ct);
     }
 
     public void Stop()
@@ -78,13 +100,13 @@ public sealed class SensorHub : IDisposable
     /// <summary>One-off fetch, used by the "Test connection" button. Does not touch the running poll.</summary>
     public Task<SensorSnapshot> TestAsync(Uri url, CancellationToken ct = default) => _client.FetchAsync(url, ct);
 
-    private async Task RunAsync(Uri url, CancellationToken ct)
+    private async Task RunAsync(Func<CancellationToken, Task<SensorSnapshot>> fetch, CancellationToken ct)
     {
         while (!ct.IsCancellationRequested)
         {
             try
             {
-                _snapshot = await _client.FetchAsync(url, ct).ConfigureAwait(false);
+                _snapshot = await fetch(ct).ConfigureAwait(false);
                 State = ConnectionState.Connected;
                 LastError = null;
             }

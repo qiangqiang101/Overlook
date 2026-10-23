@@ -16,6 +16,9 @@ internal static class Program
 
         CrashLog.Install(App.DataDirectoryOverride ?? SettingsStore.DefaultDataDirectory);
 
+        if (args.Contains("--audio-test"))
+            return AudioTest();
+
         if (args.Contains("--render"))
             return RenderCommand.Run(args, BuildAvaloniaApp);
         if (args.Contains("--screenshot"))
@@ -30,6 +33,22 @@ internal static class Program
             CrashLog.Write("Crash while running", ex);
             throw;
         }
+    }
+
+    /// <summary>Starts the real audio capture for a few seconds and prints what it hears (play some audio meanwhile).</summary>
+    private static int AudioTest()
+    {
+        using var audio = new Audio.AudioCaptureService();
+        audio.Start();
+        Console.WriteLine($"running={audio.IsRunning} error={audio.Error ?? "none"} sampleRate={audio.Analyzer.SampleRate}");
+        for (var i = 0; i < 12; i++)
+        {
+            Thread.Sleep(500);
+            audio.Analyzer.Update();
+            var bands = audio.Analyzer.Bands(16, false, Core.Audio.ScalingStrategy.Decibel);
+            Console.WriteLine($"{i * 0.5 + 0.5,4:0.0}s hasData={audio.Analyzer.HasData} peak={bands.Max():0.00} bands={string.Join(' ', bands.Select(b => (int)(b * 9)))}");
+        }
+        return 0;
     }
 
     // Also used by the previewer.

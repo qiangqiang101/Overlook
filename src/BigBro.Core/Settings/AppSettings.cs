@@ -8,6 +8,8 @@ public sealed class AppSettings
 {
     /// <summary>LibreHardwareMonitor remote web server, e.g. http://192.168.0.8:8085/data.json</summary>
     public string LhmUrl { get; set; } = LhmClient.DefaultUrl;
+    /// <summary>Linux: read this computer's own sensors instead of a remote LibreHardwareMonitor (which only exists on Windows).</summary>
+    public bool UseLocalSensors { get; set; } = OperatingSystem.IsLinux();
     public string? CurrentTheme { get; set; }
     /// <summary>UI language: the file name (without extension) of a Languages/*.json file.</summary>
     public string Language { get; set; } = "English";

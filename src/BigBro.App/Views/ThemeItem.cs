@@ -19,9 +19,9 @@ public sealed class ThemeItem : INotifyPropertyChanged
 
     public ThemeEntry Entry { get; }
     public string Name => Entry.Name;
-    public string Details => string.IsNullOrWhiteSpace(Entry.Document.Author)
+    public string Details => string.IsNullOrWhiteSpace(Entry.Header.Author)
         ? Entry.SizeLabel
-        : $"{Entry.SizeLabel}  ·  {Entry.Document.Author}";
+        : $"{Entry.SizeLabel}  ·  {Entry.Header.Author}";
 
     public Bitmap? Preview
     {
@@ -39,8 +39,8 @@ public sealed class ThemeItem : INotifyPropertyChanged
         var s = search.Trim();
         return Name.Contains(s, StringComparison.OrdinalIgnoreCase)
                || Entry.SizeLabel.Contains(s, StringComparison.OrdinalIgnoreCase)
-               || (Entry.Document.Author?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
-               || Entry.Document.Tags.Any(t => t.Contains(s, StringComparison.OrdinalIgnoreCase));
+               || (Entry.Header.Author?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || Entry.Header.Tags.Any(t => t.Contains(s, StringComparison.OrdinalIgnoreCase));
     }
 
     private void LoadPreviewAsync()

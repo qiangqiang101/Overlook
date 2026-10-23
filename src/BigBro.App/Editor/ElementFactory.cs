@@ -65,7 +65,11 @@ public static class ElementFactory
         _ => "audio",
     };
 
-    public static string LabelOf(ThemeElement e) => Types.First(t => t.Type == TypeOf(e)).Label;
+    /// <summary>The element type's name for display, translated. (New elements are still named from the English label.)</summary>
+    public static string LocalLabel(string type, string english) => BigBro.Core.Settings.Loc.T("element." + type, english);
+
+    public static string LabelOf(ThemeElement e) =>
+        Types.Where(t => t.Type == TypeOf(e)).Select(t => LocalLabel(t.Type, t.Label)).First();
 
     public static string UniqueName(ThemeDocument theme, string baseName)
     {
